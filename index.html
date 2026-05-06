@@ -1,0 +1,1483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MedLit Search — Academic Literature Tool</title>
+  <meta name="description" content="Search 6 free medical databases simultaneously, find open-access papers via Unpaywall, and get AI-powered evidence synthesis." />
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=Nunito:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0;}
+    :root{
+      --white:#ffffff;
+      --gray-50:#f8fafc;--gray-100:#f1f5f9;--gray-200:#e2e8f0;
+      --gray-300:#cbd5e1;--gray-400:#94a3b8;--gray-500:#64748b;
+      --gray-600:#475569;--gray-700:#334155;--gray-800:#1e293b;--gray-900:#0f172a;
+      --blue-50:#eff6ff;--blue-100:#dbeafe;--blue-200:#bfdbfe;
+      --blue-300:#93c5fd;--blue-400:#60a5fa;--blue-500:#3b82f6;
+      --blue-600:#2563eb;--blue-700:#1d4ed8;--blue-800:#1e40af;
+      --teal-50:#f0fdfa;--teal-100:#ccfbf1;--teal-500:#14b8a6;--teal-600:#0d9488;
+      --green-50:#f0fdf4;--green-100:#dcfce7;--green-500:#22c55e;--green-600:#16a34a;
+      --amber-50:#fffbeb;--amber-100:#fef3c7;--amber-400:#fbbf24;--amber-600:#d97706;
+      --rose-50:#fff1f2;--rose-500:#f43f5e;
+      --purple-50:#f5f3ff;--purple-200:#ddd6fe;--purple-600:#7c3aed;
+      --shadow-xs:0 1px 2px rgba(0,0,0,.05);
+      --shadow-sm:0 1px 3px rgba(0,0,0,.08),0 1px 2px rgba(0,0,0,.05);
+      --shadow:0 4px 6px -1px rgba(0,0,0,.07),0 2px 4px -1px rgba(0,0,0,.04);
+      --shadow-md:0 10px 15px -3px rgba(0,0,0,.08),0 4px 6px -2px rgba(0,0,0,.04);
+      --shadow-lg:0 20px 25px -5px rgba(0,0,0,.08),0 10px 10px -5px rgba(0,0,0,.04);
+      --r:10px;--r-sm:6px;--r-lg:14px;--r-xl:18px;
+      --font-display:'Lora',Georgia,serif;
+      --font-body:'Nunito',system-ui,sans-serif;
+    }
+    html{scroll-behavior:smooth;}
+    body{background:var(--gray-50);font-family:var(--font-body);}
+    #root{min-height:100vh;}
+    .app{min-height:100vh;background:var(--gray-50);color:var(--gray-800);padding-bottom:100px;}
+
+    /* Header */
+    .header{background:var(--white);border-bottom:1px solid var(--gray-200);box-shadow:var(--shadow-sm);position:sticky;top:0;z-index:100;padding:14px 24px 18px;}
+    .header-inner{max-width:960px;margin:0 auto;}
+    .brand{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+    .brand-mark{width:38px;height:38px;background:linear-gradient(135deg,#1d4ed8,#14b8a6);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;color:white;flex-shrink:0;box-shadow:0 2px 10px rgba(29,78,216,.3);}
+    .brand-name{font-family:var(--font-display);font-size:18px;font-weight:600;color:var(--gray-900);letter-spacing:-.01em;}
+    .brand-sub{font-size:11px;color:var(--gray-500);font-weight:400;margin-top:2px;}
+    .brand-actions{margin-left:auto;display:flex;align-items:center;gap:6px;}
+    .hdr-btn{background:none;border:1.5px solid var(--gray-200);border-radius:8px;padding:6px 12px;cursor:pointer;font-size:12px;color:var(--gray-500);font-family:var(--font-body);font-weight:600;display:flex;align-items:center;gap:5px;transition:all .15s;}
+    .hdr-btn:hover{border-color:var(--blue-300);color:var(--blue-600);}
+    .hdr-btn.active{background:var(--amber-50);border-color:var(--amber-400);color:var(--amber-600);}
+
+    /* Mode toggle */
+    .mode-bar{display:flex;align-items:center;gap:6px;margin-bottom:10px;}
+    .mode-lbl{font-size:11px;color:var(--gray-400);font-weight:700;text-transform:uppercase;letter-spacing:.07em;margin-right:2px;}
+    .mode-btn{padding:5px 13px;border-radius:20px;font-size:12px;font-weight:700;border:1.5px solid var(--gray-200);background:var(--white);color:var(--gray-500);cursor:pointer;font-family:var(--font-body);transition:all .15s;}
+    .mode-btn.active{background:var(--blue-600);border-color:var(--blue-600);color:white;}
+    .mode-btn:not(.active):hover{border-color:var(--blue-300);color:var(--blue-600);}
+
+    /* Search row */
+    .search-row{display:flex;gap:8px;align-items:center;}
+    .search-wrap{flex:1;position:relative;}
+    .search-ico{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--gray-400);font-size:15px;pointer-events:none;}
+    .search-input{width:100%;padding:11px 14px 11px 38px;background:var(--gray-50);border:1.5px solid var(--gray-200);border-radius:var(--r);font-family:var(--font-body);font-size:14px;color:var(--gray-800);outline:none;transition:all .15s;}
+    .search-input:focus{border-color:var(--blue-500);background:var(--white);box-shadow:0 0 0 3px rgba(59,130,246,.12);}
+    .search-input::placeholder{color:var(--gray-400);}
+    .search-btn{background:var(--blue-600);color:white;border:none;border-radius:var(--r);padding:11px 22px;font-family:var(--font-body);font-size:14px;font-weight:700;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:6px;white-space:nowrap;box-shadow:0 2px 8px rgba(37,99,235,.28);}
+    .search-btn:hover{background:var(--blue-700);transform:translateY(-1px);box-shadow:0 4px 14px rgba(37,99,235,.35);}
+    .search-btn:active{transform:translateY(0);}
+    .search-btn:disabled{background:var(--gray-300);box-shadow:none;cursor:not-allowed;transform:none;}
+
+    /* PICO panel */
+    .pico-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;}
+    .pico-field{display:flex;flex-direction:column;gap:4px;}
+    .pico-lbl{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:700;color:var(--gray-600);text-transform:uppercase;letter-spacing:.06em;}
+    .pico-dot{width:20px;height:20px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:white;flex-shrink:0;}
+    .pd-p{background:#2563eb;}.pd-i{background:#0d9488;}.pd-c{background:#d97706;}.pd-o{background:#7e22ce;}
+    .pico-inp{padding:8px 12px;background:var(--gray-50);border:1.5px solid var(--gray-200);border-radius:var(--r-sm);font-family:var(--font-body);font-size:13px;color:var(--gray-800);outline:none;transition:all .15s;width:100%;}
+    .pico-inp:focus{border-color:var(--blue-500);background:white;box-shadow:0 0 0 3px rgba(59,130,246,.1);}
+    .pico-preview{font-size:11px;color:var(--blue-700);background:var(--blue-50);border-radius:var(--r-sm);padding:7px 12px;margin-top:4px;font-family:monospace;word-break:break-all;line-height:1.6;border:1px solid var(--blue-200);}
+    .pico-preview-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--blue-500);margin-bottom:3px;}
+
+    /* Advanced filters */
+    .adv-bar{display:flex;align-items:center;gap:8px;margin-top:8px;flex-wrap:wrap;}
+    .adv-btn{display:flex;align-items:center;gap:5px;padding:5px 12px;border:1.5px solid var(--gray-200);border-radius:var(--r-sm);font-family:var(--font-body);font-size:12px;color:var(--gray-500);background:var(--white);cursor:pointer;font-weight:600;transition:all .15s;}
+    .adv-btn:hover{border-color:var(--blue-400);color:var(--blue-600);}
+    .adv-btn.active{background:var(--blue-50);border-color:var(--blue-400);color:var(--blue-600);}
+    .adv-n{background:var(--blue-600);color:white;border-radius:10px;padding:1px 6px;font-size:10px;font-weight:700;}
+    .adv-panel{background:var(--gray-50);border:1.5px solid var(--gray-200);border-radius:var(--r);padding:14px 16px;margin-top:6px;display:flex;flex-wrap:wrap;gap:20px;align-items:flex-end;animation:fadeUp .2s ease both;}
+    .filter-grp{display:flex;flex-direction:column;gap:5px;}
+    .filter-lbl{font-size:11px;font-weight:700;color:var(--gray-500);text-transform:uppercase;letter-spacing:.06em;}
+    .yr-row{display:flex;align-items:center;gap:6px;}
+    .yr-inp{width:72px;padding:6px 8px;border:1.5px solid var(--gray-200);border-radius:var(--r-sm);font-family:var(--font-body);font-size:13px;color:var(--gray-700);background:white;outline:none;transition:border-color .15s;}
+    .yr-inp:focus{border-color:var(--blue-500);}
+    .yr-sep{font-size:12px;color:var(--gray-400);}
+    .check-row{display:flex;align-items:center;gap:7px;cursor:pointer;user-select:none;}
+    .check-row input{width:16px;height:16px;accent-color:var(--blue-600);cursor:pointer;}
+    .check-lbl{font-size:13px;color:var(--gray-700);font-weight:500;}
+
+    /* Search history */
+    .hist-bar{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:8px;}
+    .hist-lbl{font-size:11px;color:var(--gray-400);font-weight:700;text-transform:uppercase;letter-spacing:.06em;white-space:nowrap;}
+    .hist-pill{font-size:11px;padding:3px 10px;border-radius:20px;background:var(--gray-100);color:var(--gray-600);cursor:pointer;border:1px solid var(--gray-200);font-weight:500;transition:all .15s;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:var(--font-body);}
+    .hist-pill:hover{background:var(--blue-50);color:var(--blue-600);border-color:var(--blue-200);}
+
+    /* Spinner */
+    .spinner{width:14px;height:14px;border:2px solid rgba(255,255,255,.35);border-top-color:white;border-radius:50%;animation:spin .7s linear infinite;}
+    .mini-spin{width:13px;height:13px;border:2px solid var(--gray-200);border-top-color:var(--blue-500);border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0;}
+    @keyframes spin{to{transform:rotate(360deg);}}
+
+    /* API key banner */
+    .key-banner{background:var(--amber-50);border:1.5px solid var(--amber-400);border-radius:var(--r);padding:12px 16px;margin-bottom:20px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+    .key-banner-text{font-size:13px;color:var(--amber-600);font-weight:500;flex:1;}
+    .key-input{padding:7px 12px;border:1.5px solid var(--amber-400);border-radius:var(--r-sm);font-family:var(--font-body);font-size:13px;outline:none;background:white;width:260px;color:var(--gray-800);}
+    .key-input:focus{border-color:var(--blue-500);box-shadow:0 0 0 3px rgba(59,130,246,.12);}
+    .key-save-btn{padding:7px 14px;background:var(--blue-600);color:white;border:none;border-radius:var(--r-sm);font-family:var(--font-body);font-size:13px;font-weight:600;cursor:pointer;transition:background .15s;}
+    .key-save-btn:hover{background:var(--blue-700);}
+
+    /* Main */
+    .main{max-width:960px;margin:0 auto;padding:24px;}
+
+    /* Source pills */
+    .source-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:20px;align-items:center;}
+    .source-label{font-size:11px;color:var(--gray-500);font-weight:700;text-transform:uppercase;letter-spacing:.07em;margin-right:2px;}
+    .src-pill{padding:5px 13px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;border:1.5px solid var(--gray-200);background:var(--white);color:var(--gray-600);transition:all .15s;display:flex;align-items:center;gap:5px;}
+    .src-pill:hover{border-color:var(--blue-400);color:var(--blue-600);}
+    .src-pill.active{background:var(--blue-600);border-color:var(--blue-600);color:white;}
+    .pill-n{background:rgba(255,255,255,.22);border-radius:10px;padding:1px 6px;font-size:11px;}
+    .src-pill:not(.active) .pill-n{background:var(--gray-100);color:var(--gray-500);}
+
+    /* AI Panel */
+    .ai-panel{background:linear-gradient(135deg,var(--blue-50) 0%,var(--teal-50) 100%);border:1.5px solid var(--blue-200);border-radius:var(--r-xl);padding:20px 22px;margin-bottom:24px;animation:fadeUp .4s ease both;}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(-8px);}to{opacity:1;transform:translateY(0);}}
+    .ai-top{display:flex;align-items:center;gap:8px;margin-bottom:14px;}
+    .ai-badge{display:flex;align-items:center;gap:6px;background:var(--blue-600);color:white;border-radius:20px;padding:4px 12px;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;}
+    .ai-dot{width:7px;height:7px;background:white;border-radius:50%;animation:pulse 1.5s ease-in-out infinite;flex-shrink:0;}
+    @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.35;}}
+    .ai-ev{display:inline-flex;align-items:center;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;text-transform:uppercase;letter-spacing:.05em;}
+    .ev-high{background:#dcfce7;color:#15803d;}
+    .ev-moderate{background:#fef3c7;color:#92400e;}
+    .ev-low{background:#fce7f3;color:#9d174d;}
+    .ev-mixed{background:var(--blue-50);color:var(--blue-700);border:1px solid var(--blue-200);}
+    .ai-dismiss{margin-left:auto;background:none;border:none;cursor:pointer;font-size:16px;color:var(--gray-400);transition:color .15s;line-height:1;}
+    .ai-dismiss:hover{color:var(--gray-600);}
+    .ai-section{margin-bottom:12px;}
+    .ai-section-lbl{font-size:10px;font-weight:700;color:var(--gray-500);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;}
+    .ai-overview{font-family:var(--font-display);font-size:15px;color:var(--gray-700);line-height:1.8;margin-bottom:14px;font-style:italic;}
+    .ai-themes{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:12px;}
+    .ai-tag{background:white;border:1px solid var(--blue-200);border-radius:20px;padding:4px 12px;font-size:12px;color:var(--blue-700);font-weight:600;}
+    .ai-types{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px;}
+    .ai-type-chip{font-size:11px;padding:3px 10px;border-radius:20px;background:white;border:1px solid var(--gray-200);color:var(--gray-600);font-weight:600;}
+    .ai-clinical{padding:10px 14px;background:white;border-radius:var(--r-sm);border-left:3px solid var(--green-500);margin-bottom:12px;}
+    .ai-clinical-lbl{font-size:10px;font-weight:700;color:var(--green-600);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px;}
+    .ai-clinical-txt{font-size:13px;color:var(--gray-700);line-height:1.65;}
+    .ai-gaps-wrap{padding:10px 14px;background:white;border-radius:var(--r-sm);border-left:3px solid var(--teal-500);margin-bottom:12px;}
+    .ai-gaps-label{font-size:10px;font-weight:700;color:var(--teal-600);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px;}
+    .ai-gaps{font-size:13px;color:var(--gray-600);line-height:1.65;}
+    .ai-suggest-lbl{font-size:10px;font-weight:700;color:var(--gray-500);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;}
+    .ai-suggest-wrap{display:flex;flex-wrap:wrap;gap:5px;}
+    .ai-suggest-tag{font-size:12px;padding:4px 11px;border-radius:20px;border:1.5px solid var(--blue-200);background:white;color:var(--blue-600);cursor:pointer;font-weight:600;transition:all .15s;font-family:var(--font-body);}
+    .ai-suggest-tag:hover{background:var(--blue-600);color:white;border-color:var(--blue-600);}
+    .ai-loading-msg{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--blue-600);font-weight:500;}
+    .ai-no-key{font-size:13px;color:var(--gray-500);padding:4px 0;line-height:1.6;}
+
+    /* Study type badges */
+    .st-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;text-transform:uppercase;letter-spacing:.04em;flex-shrink:0;}
+    .st-sr{background:#f3e8ff;color:#7e22ce;}
+    .st-rct{background:#dcfce7;color:#15803d;}
+    .st-cohort{background:#fef3c7;color:#92400e;}
+    .st-qual{background:#fce7f3;color:#9d174d;}
+    .st-cross{background:#dbeafe;color:#1d4ed8;}
+    .st-review{background:#ccfbf1;color:#0f766e;}
+    .st-case{background:#fef9c3;color:#854d0e;}
+
+    /* Toolbar */
+    .toolbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px;}
+    .res-count{font-size:13px;font-weight:600;color:var(--gray-700);}
+    .toolbar-right{display:flex;align-items:center;gap:8px;}
+    .sort-sel{padding:5px 10px;border:1.5px solid var(--gray-200);border-radius:var(--r-sm);font-family:var(--font-body);font-size:12px;color:var(--gray-700);background:var(--white);outline:none;cursor:pointer;font-weight:500;}
+
+    /* Export dropdown */
+    .export-wrap{position:relative;}
+    .export-btn{padding:5px 12px;border:1.5px solid var(--gray-200);border-radius:var(--r-sm);font-family:var(--font-body);font-size:12px;color:var(--gray-600);background:var(--white);cursor:pointer;transition:all .15s;font-weight:600;display:flex;align-items:center;gap:5px;}
+    .export-btn:hover{border-color:var(--blue-400);color:var(--blue-600);background:var(--blue-50);}
+    .export-menu{position:absolute;right:0;top:calc(100% + 4px);background:white;border:1.5px solid var(--gray-200);border-radius:var(--r-sm);box-shadow:var(--shadow-md);z-index:200;min-width:175px;overflow:hidden;animation:fadeUp .15s ease both;}
+    .export-item{display:block;width:100%;padding:9px 14px;font-size:13px;color:var(--gray-700);cursor:pointer;transition:background .1s;font-weight:500;border:none;background:none;text-align:left;font-family:var(--font-body);}
+    .export-item:hover{background:var(--gray-50);color:var(--blue-600);}
+    .export-item+.export-item{border-top:1px solid var(--gray-100);}
+
+    /* Bookmark */
+    .bk-btn{background:none;border:none;cursor:pointer;font-size:15px;line-height:1;padding:3px 5px;border-radius:4px;transition:opacity .15s;opacity:.4;}
+    .bk-btn:hover{opacity:.8;}
+    .bk-btn.saved{opacity:1;}
+    .bk-bar{background:var(--amber-50);border:1.5px solid var(--amber-400);border-radius:var(--r);padding:10px 16px;margin-bottom:14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+    .bk-count-txt{font-size:13px;font-weight:700;color:var(--amber-600);}
+    .bk-view{font-size:12px;font-weight:700;color:var(--blue-600);background:none;border:none;cursor:pointer;font-family:var(--font-body);text-decoration:underline;}
+    .bk-clear{font-size:12px;color:var(--gray-400);background:none;border:none;cursor:pointer;font-family:var(--font-body);margin-left:auto;}
+
+    /* Abstract expand */
+    .abstract-more{background:none;border:none;cursor:pointer;font-size:11px;color:var(--blue-500);font-family:var(--font-body);font-weight:700;padding:3px 0 0;display:block;transition:color .15s;}
+    .abstract-more:hover{color:var(--blue-700);}
+
+    /* Result cards */
+    .result-card{background:var(--white);border:1.5px solid var(--gray-200);border-radius:var(--r);padding:20px 22px;margin-bottom:10px;transition:all .15s;box-shadow:var(--shadow-xs);animation:cardIn .22s ease both;}
+    .result-card:hover{border-color:var(--blue-200);box-shadow:var(--shadow);transform:translateX(2px);}
+    @keyframes cardIn{from{opacity:0;transform:translateY(7px);}to{opacity:1;transform:translateY(0);}}
+    .card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:8px;}
+    .card-title{font-family:var(--font-display);font-size:15.5px;font-weight:600;color:var(--gray-900);line-height:1.55;flex:1;}
+    .card-title a{color:inherit;text-decoration:none;}
+    .card-title a:hover{color:var(--blue-600);text-decoration:underline;text-decoration-color:var(--blue-300);}
+    .card-badges{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;}
+    .src-badge{font-size:10px;font-weight:700;padding:3px 8px;border-radius:4px;letter-spacing:.04em;text-transform:uppercase;}
+    .b-pubmed{background:#dbeafe;color:#1d4ed8;}
+    .b-europepmc{background:#dcfce7;color:#15803d;}
+    .b-semanticscholar{background:#fef3c7;color:#92400e;}
+    .b-openalex{background:#f3e8ff;color:#7e22ce;}
+    .b-crossref{background:#fce7f3;color:#9d174d;}
+    .b-doaj{background:#ccfbf1;color:#0f766e;}
+    .card-meta{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--gray-500);margin-bottom:10px;flex-wrap:wrap;}
+    .meta-year{font-weight:700;color:var(--gray-600);}
+    .meta-sep{color:var(--gray-300);}
+    .meta-journal{font-style:italic;}
+    .meta-authors{color:var(--gray-400);}
+    .meta-cite{font-size:11px;color:var(--gray-400);}
+    .card-abstract{font-size:13.5px;color:var(--gray-600);line-height:1.75;margin-bottom:4px;padding:10px 14px;background:var(--gray-50);border-radius:var(--r-sm);border-left:3px solid var(--blue-200);}
+    .card-footer{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding-top:12px;border-top:1px solid var(--gray-100);margin-top:12px;}
+    .lbtn{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:700;padding:5px 13px;border-radius:var(--r-sm);text-decoration:none;transition:all .15s;border:1.5px solid transparent;cursor:pointer;font-family:var(--font-body);}
+    .lbtn-primary{background:var(--blue-600);color:white;border-color:var(--blue-600);}
+    .lbtn-primary:hover{background:var(--blue-700);}
+    .lbtn-outline{background:var(--white);color:var(--gray-600);border-color:var(--gray-200);}
+    .lbtn-outline:hover{border-color:var(--blue-400);color:var(--blue-600);background:var(--blue-50);}
+    .lbtn-green{background:var(--green-50);color:var(--green-600);border-color:#86efac;}
+    .lbtn-green:hover{background:var(--green-100);}
+    .lbtn-amber{background:var(--amber-50);color:var(--amber-600);border-color:var(--amber-400);}
+    .lbtn-amber:hover{background:var(--amber-100);}
+    .lbtn-gray{background:var(--gray-100);color:var(--gray-400);border-color:var(--gray-200);cursor:default!important;}
+    .oa-flag{font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;background:var(--green-50);color:var(--green-600);border:1px solid #86efac;text-transform:uppercase;letter-spacing:.05em;}
+
+    /* Loading */
+    .loading-sources{display:flex;flex-direction:column;gap:8px;margin-bottom:16px;}
+    .loading-src{display:flex;align-items:center;gap:10px;padding:11px 14px;background:var(--white);border-radius:var(--r-sm);border:1.5px solid var(--gray-200);font-size:13px;color:var(--gray-500);font-weight:500;box-shadow:var(--shadow-xs);}
+    .done-dot{width:14px;height:14px;background:var(--green-500);border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-size:9px;flex-shrink:0;}
+    .err-bar{background:var(--rose-50);border:1.5px solid #fecdd3;border-radius:var(--r-sm);padding:9px 14px;font-size:12px;color:var(--rose-500);margin-bottom:8px;font-weight:500;}
+
+    /* Empty state */
+    .empty{text-align:center;padding:80px 20px;background:var(--white);border-radius:var(--r-xl);border:2px dashed var(--gray-200);}
+    .empty-ico{font-size:52px;margin-bottom:18px;}
+    .empty-title{font-family:var(--font-display);font-size:22px;color:var(--gray-800);margin-bottom:10px;}
+    .empty-desc{font-size:14px;color:var(--gray-500);max-width:460px;margin:0 auto 20px;line-height:1.7;}
+    .db-chips{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;margin-top:16px;}
+    .db-chip{font-size:11px;padding:3px 10px;border-radius:20px;font-weight:600;background:var(--blue-50);color:var(--blue-700);border:1px solid var(--blue-200);}
+    .example-queries{margin-top:20px;}
+    .example-lbl{font-size:12px;color:var(--gray-400);font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;}
+    .example-wrap{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;}
+    .example-q{font-size:12px;padding:5px 13px;border-radius:20px;background:white;border:1.5px solid var(--gray-200);color:var(--gray-600);cursor:pointer;font-family:var(--font-body);font-weight:500;transition:all .15s;}
+    .example-q:hover{border-color:var(--blue-300);color:var(--blue-600);background:var(--blue-50);}
+
+    /* Section headings */
+    .section{margin-top:44px;}
+    .sec-hd{display:flex;align-items:center;gap:10px;margin-bottom:5px;}
+    .sec-ico{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;}
+    .sec-ico-blue{background:var(--blue-100);}
+    .sec-ico-amber{background:var(--amber-100);}
+    .sec-ico-teal{background:var(--teal-100);}
+    .sec-title{font-family:var(--font-display);font-size:19px;font-weight:600;color:var(--gray-900);}
+    .sec-desc{font-size:13px;color:var(--gray-500);margin-bottom:18px;line-height:1.65;padding-left:40px;}
+
+    /* Paywall accordion */
+    .pw-db{background:var(--white);border:1.5px solid var(--gray-200);border-radius:var(--r);margin-bottom:8px;overflow:hidden;box-shadow:var(--shadow-xs);transition:border-color .15s;}
+    .pw-db:hover{border-color:var(--gray-300);}
+    .pw-db-hd{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;cursor:pointer;transition:background .1s;user-select:none;}
+    .pw-db-hd:hover{background:var(--gray-50);}
+    .pw-hd-left{display:flex;align-items:center;gap:12px;}
+    .db-dot{width:11px;height:11px;border-radius:50%;flex-shrink:0;}
+    .db-name{font-size:14px;font-weight:700;color:var(--gray-800);}
+    .db-coverage{font-size:11.5px;color:var(--gray-500);margin-top:2px;}
+    .pw-hd-right{display:flex;align-items:center;gap:10px;}
+    .db-open{padding:6px 14px;background:var(--blue-600);color:white;border:none;border-radius:var(--r-sm);font-size:12px;font-weight:700;cursor:pointer;font-family:var(--font-body);text-decoration:none;display:inline-flex;align-items:center;gap:4px;transition:background .15s;}
+    .db-open:hover{background:var(--blue-700);}
+    .chev{color:var(--gray-400);font-size:12px;transition:transform .2s;display:inline-block;}
+    .chev.open{transform:rotate(180deg);}
+    .pw-db-body{padding:4px 18px 18px;border-top:1px solid var(--gray-100);background:var(--gray-50);}
+    .steps{padding-top:14px;display:flex;flex-direction:column;gap:11px;}
+    .step{display:flex;gap:12px;align-items:flex-start;}
+    .step-n{width:23px;height:23px;background:var(--blue-600);color:white;border-radius:50%;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+    .step-txt{font-size:13px;color:var(--gray-700);line-height:1.65;flex:1;}
+    .step-tip{display:inline-flex;align-items:center;gap:5px;background:var(--amber-50);color:#92400e;border:1px solid var(--amber-400);border-radius:4px;font-size:11.5px;padding:4px 10px;margin-top:6px;font-weight:600;}
+
+    /* Workaround grid */
+    .wk-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px;}
+    .wk-card{background:var(--white);border:1.5px solid var(--gray-200);border-radius:var(--r);padding:16px 18px;box-shadow:var(--shadow-xs);transition:all .15s;}
+    .wk-card:hover{border-color:var(--blue-300);transform:translateY(-2px);box-shadow:var(--shadow);}
+    .wk-top{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+    .wk-icon{font-size:20px;}
+    .wk-name{font-size:14px;font-weight:700;color:var(--gray-800);}
+    .wk-type{margin-left:auto;font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;letter-spacing:.04em;text-transform:uppercase;}
+    .t-free{background:var(--green-50);color:var(--green-600);border:1px solid #86efac;}
+    .t-legal{background:var(--blue-50);color:var(--blue-700);border:1px solid var(--blue-200);}
+    .t-tip{background:var(--amber-50);color:var(--amber-600);border:1px solid var(--amber-400);}
+    .wk-desc{font-size:13px;color:var(--gray-600);line-height:1.65;margin-bottom:10px;}
+    .wk-link{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:700;color:var(--blue-600);text-decoration:none;transition:color .15s;}
+    .wk-link:hover{color:var(--blue-700);text-decoration:underline;}
+
+    /* Toast */
+    .toast{position:fixed;bottom:22px;right:22px;background:var(--gray-900);color:white;border-radius:var(--r);padding:13px 18px;font-size:13px;font-weight:500;z-index:9999;box-shadow:var(--shadow-lg);animation:toastIn .2s ease;}
+    @keyframes toastIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+
+    /* Footer */
+    .footer{text-align:center;padding:48px 24px 20px;font-size:12px;color:var(--gray-400);}
+    .footer a{color:var(--blue-500);text-decoration:none;}
+    .footer a:hover{text-decoration:underline;}
+
+    @media(max-width:640px){
+      .header{padding:12px 14px 16px;}
+      .main{padding:14px;}
+      .search-btn{padding:11px 14px;font-size:13px;}
+      .card-top{flex-direction:column;gap:6px;}
+      .card-badges{flex-direction:row;flex-wrap:wrap;}
+      .wk-grid{grid-template-columns:1fr;}
+      .pw-hd-right{flex-direction:column;align-items:flex-end;gap:6px;}
+      .key-input{width:100%;}
+      .pico-grid{grid-template-columns:1fr;}
+      .adv-panel{flex-direction:column;gap:12px;}
+    }
+  </style>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel">
+const { useState, useCallback, useRef, useEffect } = React;
+
+// ── Utilities ──────────────────────────────────────────────────────────────────
+
+function cleanHtml(s = "") {
+  return s.replace(/<[^>]*>/g, "")
+    .replace(/&amp;/g,"&").replace(/&lt;/g,"<").replace(/&gt;/g,">")
+    .replace(/&quot;/g,'"').replace(/&#39;/g,"'").trim();
+}
+
+function truncate(s, n = 1500) {
+  if (!s) return null;
+  s = s.trim();
+  return s.length > n ? s.slice(0, n) + "…" : s;
+}
+
+function truncateDisplay(s, n = 280) {
+  if (!s) return null;
+  return s.length > n ? s.slice(0, n) + "…" : s;
+}
+
+function reconstructAbstract(inv) {
+  if (!inv || typeof inv !== "object") return null;
+  try {
+    const all = Object.values(inv).flat();
+    if (!all.length) return null;
+    const max = Math.max(...all) + 1;
+    const arr = new Array(max).fill("");
+    for (const [w, ps] of Object.entries(inv)) for (const p of ps) if (p < max) arr[p] = w;
+    return arr.join(" ").trim() || null;
+  } catch { return null; }
+}
+
+function dedup(all) {
+  const seen = new Set();
+  return all.filter(r => {
+    const k = r.doi ? r.doi.toLowerCase() : r.title.toLowerCase().slice(0, 60);
+    if (seen.has(k)) return false;
+    seen.add(k); return true;
+  });
+}
+
+function guessStudyType(title = "", abstract = "") {
+  const t = (title + " " + (abstract || "")).toLowerCase();
+  if (/systematic review|meta.analysis/.test(t)) return "Systematic Review";
+  if (/\brct\b|randomis|randomiz|placebo-controlled|double.blind/.test(t)) return "RCT";
+  if (/cohort study|prospective study|retrospective study|longitudinal/.test(t)) return "Cohort";
+  if (/qualitative|thematic analysis|grounded theory|phenomenolog|focus group|interview/.test(t)) return "Qualitative";
+  if (/\bsurvey\b|questionnaire|cross.sectional/.test(t)) return "Cross-Sectional";
+  if (/scoping review|narrative review|integrative review/.test(t)) return "Review";
+  if (/case report|case series/.test(t)) return "Case Report";
+  return null;
+}
+
+function buildPicoQuery(p, i, c, o) {
+  return [p, i, c, o].filter(s => s && s.trim()).map(s => `(${s.trim()})`).join(" AND ");
+}
+
+function downloadFile(content, filename, mimeType) {
+  const blob = new Blob([content], { type: mimeType });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = filename; a.click();
+  URL.revokeObjectURL(url);
+}
+
+function toBibTeX(results) {
+  return results.map((r, i) => {
+    const key = `ref${i + 1}_${(r.year || "nd")}`;
+    const doi = r.doi ? r.doi.replace("https://doi.org/", "") : "";
+    const authors = (r.authors || "Unknown").replace(/ et al\.?/, " and others");
+    return `@article{${key},\n  title   = {${r.title}},\n  author  = {${authors}},\n  year    = {${r.year || "n.d."}},\n  journal = {${r.journal || ""}},${doi ? `\n  doi     = {${doi}},` : ""}\n  url     = {${r.link || r.doi || ""}}\n}`;
+  }).join("\n\n");
+}
+
+function toRIS(results) {
+  return results.map(r => {
+    const doi = r.doi ? r.doi.replace("https://doi.org/", "") : "";
+    const lines = ["TY  - JOUR", `TI  - ${r.title}`];
+    (r.authors || "").split(",").forEach(a => lines.push(`AU  - ${a.trim()}`));
+    if (r.year) lines.push(`PY  - ${r.year}`);
+    if (r.journal) lines.push(`JO  - ${r.journal}`);
+    if (doi) lines.push(`DO  - ${doi}`);
+    if (r.link || r.doi) lines.push(`UR  - ${r.link || r.doi}`);
+    if (r.abstract) lines.push(`AB  - ${r.abstract.slice(0, 500)}`);
+    lines.push("ER  - ");
+    return lines.join("\n");
+  }).join("\n\n");
+}
+
+function toCSV(results) {
+  const esc = s => `"${(s || "").replace(/"/g, '""')}"`;
+  const header = "Title,Authors,Year,Journal,DOI,Source,Open Access,Study Type";
+  const rows = results.map(r => [
+    esc(r.title), esc(r.authors), r.year || "", esc(r.journal),
+    r.doi || r.link || "", r.source || "",
+    r.isOA ? "Yes" : "No", r.studyType || ""
+  ].join(","));
+  return [header, ...rows].join("\n");
+}
+
+// ── API Functions ──────────────────────────────────────────────────────────────
+
+async function searchPubMed(q) {
+  const sRes = await fetch(`https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&term=${encodeURIComponent(q)}&retmax=15&retmode=json&sort=relevance`);
+  const sData = await sRes.json();
+  const ids = sData.esearchresult?.idlist || [];
+  if (!ids.length) return [];
+  const fRes = await fetch(`https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&id=${ids.join(",")}&rettype=xml&retmode=xml`);
+  const xml = await fRes.text();
+  const doc = new DOMParser().parseFromString(xml, "text/xml");
+  return Array.from(doc.querySelectorAll("PubmedArticle")).map(a => {
+    const pmid = a.querySelector("PMID")?.textContent;
+    const title = cleanHtml(a.querySelector("ArticleTitle")?.textContent || "Untitled");
+    const abstractParts = Array.from(a.querySelectorAll("AbstractText")).map(t => {
+      const lbl = t.getAttribute("Label");
+      return lbl ? `${lbl}: ${t.textContent}` : t.textContent;
+    });
+    const authorEls = Array.from(a.querySelectorAll("Author"));
+    const authNames = authorEls.slice(0, 4).map(el => {
+      const ln = el.querySelector("LastName")?.textContent || "";
+      const ini = el.querySelector("Initials")?.textContent || "";
+      return `${ln} ${ini}`.trim();
+    });
+    const doi = a.querySelector('ArticleId[IdType="doi"]')?.textContent || null;
+    const abstract = truncate(abstractParts.join(" ") || null);
+    const studyType = guessStudyType(title, abstract || "");
+    return {
+      id: `pm-${pmid}`, source: "pubmed", title, abstract,
+      studyType,
+      authors: authNames.join(", ") + (authorEls.length > 4 ? " et al." : ""),
+      year: a.querySelector("PubDate Year")?.textContent || a.querySelector("PubDate MedlineDate")?.textContent?.slice(0,4) || "n.d.",
+      journal: a.querySelector("Journal Title")?.textContent || a.querySelector("MedlineTA")?.textContent || "",
+      doi: doi ? `https://doi.org/${doi}` : null,
+      link: `https://pubmed.ncbi.nlm.nih.gov/${pmid}/`,
+      pdfUrl: null, isOA: false, oaChecked: false, citationCount: null,
+    };
+  });
+}
+
+async function searchEuropePMC(q) {
+  const res = await fetch(`https://www.ebi.ac.uk/europepmc/webservices/rest/search?query=${encodeURIComponent(q)}&format=json&pageSize=15&resultType=core&sort=relevance`);
+  const data = await res.json();
+  return (data.resultList?.result || []).map(p => {
+    const abstract = truncate(p.abstractText || null);
+    return {
+      id: `epmc-${p.id}`, source: "europepmc",
+      title: cleanHtml(p.title || "Untitled"),
+      abstract,
+      studyType: guessStudyType(p.title || "", abstract || ""),
+      authors: (p.authorString?.length > 90 ? p.authorString.slice(0,90)+"…" : p.authorString) || "Unknown",
+      year: String(p.pubYear || "n.d."),
+      journal: p.journalTitle || "",
+      doi: p.doi ? `https://doi.org/${p.doi}` : null,
+      link: p.doi ? `https://doi.org/${p.doi}` : `https://europepmc.org/article/${p.source}/${p.id}`,
+      pdfUrl: p.fullTextUrlList?.fullTextUrl?.find(u => u.documentStyle === "pdf")?.url || null,
+      isOA: !!p.isOpenAccess, oaChecked: true, citationCount: p.citedByCount || null,
+    };
+  });
+}
+
+async function searchSemanticScholar(q) {
+  const res = await fetch(`https://api.semanticscholar.org/graph/v1/paper/search?query=${encodeURIComponent(q)}&limit=15&fields=title,authors,year,venue,externalIds,openAccessPdf,abstract,citationCount`);
+  const data = await res.json();
+  return (data.data || []).map(p => {
+    const abstract = truncate(p.abstract || null);
+    return {
+      id: `ss-${p.paperId}`, source: "semanticscholar",
+      title: cleanHtml(p.title || "Untitled"),
+      abstract,
+      studyType: guessStudyType(p.title || "", abstract || ""),
+      authors: (p.authors?.slice(0,4).map(a => a.name).join(", ") || "Unknown") + (p.authors?.length > 4 ? " et al." : ""),
+      year: p.year ? String(p.year) : "n.d.",
+      journal: p.venue || "",
+      doi: p.externalIds?.DOI ? `https://doi.org/${p.externalIds.DOI}` : null,
+      link: `https://www.semanticscholar.org/paper/${p.paperId}`,
+      pdfUrl: p.openAccessPdf?.url || null,
+      isOA: !!p.openAccessPdf?.url, oaChecked: true,
+      citationCount: p.citationCount ?? null,
+    };
+  });
+}
+
+async function searchOpenAlex(q) {
+  const res = await fetch(`https://api.openalex.org/works?search=${encodeURIComponent(q)}&per-page=15&sort=relevance_score&mailto=medlitsearch@user.tool`);
+  const data = await res.json();
+  return (data.results || []).map(p => {
+    const abstract = truncate(reconstructAbstract(p.abstract_inverted_index));
+    return {
+      id: `oa-${p.id}`, source: "openalex",
+      title: cleanHtml(p.title || "Untitled"),
+      abstract,
+      studyType: guessStudyType(p.title || "", abstract || ""),
+      authors: (p.authorships?.slice(0,4).map(a => a.author?.display_name).filter(Boolean).join(", ") || "Unknown") + (p.authorships?.length > 4 ? " et al." : ""),
+      year: p.publication_year ? String(p.publication_year) : "n.d.",
+      journal: p.primary_location?.source?.display_name || "",
+      doi: p.doi || null,
+      link: p.doi || p.id,
+      pdfUrl: p.open_access?.oa_url || null,
+      isOA: !!p.open_access?.is_oa, oaChecked: true,
+      citationCount: p.cited_by_count ?? null,
+    };
+  });
+}
+
+async function searchCrossRef(q) {
+  const res = await fetch(`https://api.crossref.org/works?query.bibliographic=${encodeURIComponent(q)}&rows=12&select=DOI,title,author,published,container-title,abstract&mailto=medlitsearch@user.tool`);
+  const data = await res.json();
+  return (data.message?.items || []).map(p => {
+    const doi = p.DOI;
+    const year = p.published?.["date-parts"]?.[0]?.[0];
+    const title = cleanHtml(Array.isArray(p.title) ? p.title[0] : (p.title || "Untitled"));
+    const abstract = truncate(p.abstract ? cleanHtml(p.abstract) : null);
+    return {
+      id: `cr-${doi}`, source: "crossref",
+      title, abstract,
+      studyType: guessStudyType(title, abstract || ""),
+      authors: (p.author?.slice(0,4).map(a => `${a.family||""} ${(a.given||"").slice(0,1)}`.trim()).join(", ") || "Unknown") + (p.author?.length > 4 ? " et al." : ""),
+      year: year ? String(year) : "n.d.",
+      journal: Array.isArray(p["container-title"]) ? p["container-title"][0] : (p["container-title"] || ""),
+      doi: `https://doi.org/${doi}`,
+      link: `https://doi.org/${doi}`,
+      pdfUrl: null, isOA: false, oaChecked: false, citationCount: null,
+    };
+  });
+}
+
+async function searchDOAJ(q) {
+  const res = await fetch(`https://doaj.org/api/search/articles/${encodeURIComponent(q)}?page=1&pageSize=12`);
+  const data = await res.json();
+  return (data.results || []).map(r => {
+    const bib = r.bibjson || {};
+    const doiId = bib.identifier?.find(i => i.type === "doi")?.id;
+    const fulltext = bib.link?.find(l => l.type === "fulltext")?.url;
+    const title = cleanHtml(bib.title || "Untitled");
+    const abstract = truncate(bib.abstract || null);
+    return {
+      id: `doaj-${r.id}`, source: "doaj",
+      title, abstract,
+      studyType: guessStudyType(title, abstract || ""),
+      authors: (bib.author?.slice(0,4).map(a => a.name).filter(Boolean).join(", ") || "Unknown") + (bib.author?.length > 4 ? " et al." : ""),
+      year: String(bib.year || "n.d."),
+      journal: bib.journal?.title || "",
+      doi: doiId ? `https://doi.org/${doiId}` : null,
+      link: fulltext || (doiId ? `https://doi.org/${doiId}` : `https://doaj.org/article/${r.id}`),
+      pdfUrl: fulltext || null, isOA: true, oaChecked: true, citationCount: null,
+    };
+  });
+}
+
+async function checkUnpaywall(doi) {
+  if (!doi) return null;
+  const clean = doi.replace("https://doi.org/", "");
+  const res = await fetch(`https://api.unpaywall.org/v2/${encodeURIComponent(clean)}?email=medlitsearch@user.tool`);
+  const data = await res.json();
+  if (data.is_oa) {
+    const loc = data.best_oa_location;
+    return { isOA: true, pdfUrl: loc?.url_for_pdf || loc?.url || null };
+  }
+  return { isOA: false, pdfUrl: null };
+}
+
+async function summarizeWithAI(papers, query, apiKey) {
+  if (!apiKey) return null;
+  const list = papers.slice(0, 20).map((p, i) =>
+    `${i+1}. "${p.title}" (${p.year})${p.journal ? ` — ${p.journal}` : ""}${p.studyType ? ` [${p.studyType}]` : ""}${p.abstract ? `\n${p.abstract.slice(0,300)}` : ""}`
+  ).join("\n\n");
+
+  const response = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "x-api-key": apiKey,
+      "anthropic-version": "2023-06-01",
+      "anthropic-dangerous-direct-browser-access": "true"
+    },
+    body: JSON.stringify({
+      model: "claude-opus-4-7",
+      max_tokens: 1600,
+      system: "You are a senior medical research librarian and evidence-based practice specialist. Analyse the provided search results and return ONLY valid JSON — no markdown fences, no extra text.",
+      messages: [{
+        role: "user",
+        content: `Search query: "${query}"\n\nPapers found:\n${list}\n\nReturn this exact JSON:\n{"overview":"3-4 sentence synthesis of the evidence landscape","themes":["theme1","theme2","theme3","theme4"],"study_types":["list unique study types identified e.g. RCT, Systematic Review, Cohort Study, Qualitative"],"evidence_level":"HIGH or MODERATE or LOW or MIXED — one word only","clinical_implications":"1-2 sentences on direct clinical or practice implications","gaps":"1-2 sentences on research gaps or limitations","suggested_terms":["3-4 related search terms the user could try next"]}`
+      }]
+    })
+  });
+  const data = await response.json();
+  if (data.error) throw new Error(data.error.message);
+  const raw = data.content?.[0]?.text || "{}";
+  return JSON.parse(raw.replace(/```json|```/g, "").trim());
+}
+
+// ── Static Data ────────────────────────────────────────────────────────────────
+
+const SOURCE_META = {
+  pubmed:          { label: "PubMed",          badge: "b-pubmed" },
+  europepmc:       { label: "Europe PMC",       badge: "b-europepmc" },
+  semanticscholar: { label: "Sem. Scholar",     badge: "b-semanticscholar" },
+  openalex:        { label: "OpenAlex",         badge: "b-openalex" },
+  crossref:        { label: "CrossRef",         badge: "b-crossref" },
+  doaj:            { label: "DOAJ",             badge: "b-doaj" },
+};
+
+const STUDY_TYPE_CSS = {
+  "Systematic Review": "st-sr",
+  "RCT":               "st-rct",
+  "Cohort":            "st-cohort",
+  "Qualitative":       "st-qual",
+  "Cross-Sectional":   "st-cross",
+  "Review":            "st-review",
+  "Case Report":       "st-case",
+};
+
+const EXAMPLE_QUERIES = [
+  "postnatal depression maternal mental health",
+  "hand hygiene infection prevention nurses",
+  "breastfeeding support interventions",
+  "pressure ulcer prevention nursing home",
+  "pain management palliative care",
+];
+
+const PAYWALL_DBS = [
+  {
+    name:"CINAHL", color:"#2563eb",
+    coverage:"Nursing, Allied Health, Midwifery — 1937 to present",
+    getUrl: q => `https://search.ebscohost.com/login.aspx?direct=true&db=cin20&bquery=${encodeURIComponent(q)}&type=1&site=ehost-live`,
+    steps:[
+      "Click Open CINAHL — you'll land on the EBSCOhost login page.",
+      "Select your institution from the dropdown, or enter your Athens / NHS / university library credentials.",
+      "Your Boolean query is pre-loaded in the search box. Review it, then click Search.",
+      "Use the Full Text checkbox in the left sidebar to filter to immediately accessible articles.",
+      "For articles without full text, click Find it @ [Your Library] to submit an interlibrary loan request — usually fulfilled within 24–48 hours.",
+    ],
+    tip:"Tick Peer Reviewed and set a date range in the left sidebar refiners before viewing results.",
+  },
+  {
+    name:"Scopus", color:"#e67e22",
+    coverage:"Multidisciplinary — 7,000+ publishers, 90M+ records",
+    getUrl: q => `https://www.scopus.com/search/form.uri?display=basic&query=${encodeURIComponent(q)}`,
+    steps:[
+      "Click Open Scopus — you'll arrive at the basic search form with your keywords pre-loaded.",
+      "Switch to Advanced Search if you want to add field codes (TITLE, AUTHOR, AFFIL, etc.).",
+      "Log in via your institution's Scopus subscription — most universities and NHS Trusts provide access.",
+      "Filter results by Document Type → Article and set a year range using the left panel.",
+      "Click the title to open the abstract, then Full text at publisher or ScienceDirect for the PDF.",
+    ],
+    tip:"Use Cited by on any key paper to find all subsequent work that built on it — excellent for citation tracking.",
+  },
+  {
+    name:"Web of Science", color:"#c0392b",
+    coverage:"High-impact journals, citation mapping — 1900 to present",
+    getUrl: q => `https://www.webofscience.com/wos/woscc/basic-search?query=${encodeURIComponent(q)}&field=ALL`,
+    steps:[
+      "Click Open WoS — the link includes your keywords pre-loaded where supported. Sign in with your institution's WoS account or via federated login.",
+      "If your keywords did not auto-fill, paste them into the Basic Search box, then click Search.",
+      "For Boolean searching, click Advanced Search and type: TS=(keyword1 AND keyword2).",
+      "Filter by Document Types → Article / Review and set your date range.",
+      "Use Analyze Results to see publication trends and identify top journals in your topic.",
+      "Download citations into Endnote, Mendeley, or Zotero using the Export button.",
+    ],
+    tip:"The Highly Cited Papers filter surfaces the most influential work in your topic — use it to quickly identify foundational papers.",
+  },
+  {
+    name:"ProQuest", color:"#16a085",
+    coverage:"Dissertations, theses, grey literature, nursing databases",
+    getUrl: q => `https://search.proquest.com/search?query=${encodeURIComponent(q)}&searchtype=basic`,
+    steps:[
+      "Click Open ProQuest — your keywords are embedded in the link. Select your institution's subscription database from the dropdown (e.g. ProQuest Nursing & Allied Health).",
+      "If keywords didn't pre-fill, paste them into the search bar. ProQuest supports Boolean AND/OR/NOT across fields.",
+      "Limit to Peer Reviewed and select Full Text to restrict to immediately accessible content.",
+      "ProQuest is the primary source for dissertations — tick ProQuest Dissertations & Theses to include graduate research.",
+      "Export selected citations to your reference manager via the Save / Export option.",
+    ],
+    tip:"ProQuest includes grey literature and government health reports often excluded from medical databases — valuable for policy-relevant reviews.",
+  },
+  {
+    name:"MIDIRS", color:"#8e44ad",
+    coverage:"Maternity & infant care — specialist midwifery literature",
+    getUrl: q => `https://www.midirs.org/evidence/maternity-and-infant-care/search/?query=${encodeURIComponent(q)}`,
+    steps:[
+      "Click Open MIDIRS — your query will be pre-loaded in the search box.",
+      "MIDIRS requires a paid institutional or individual subscription. Log in with your MIDIRS credentials.",
+      "Results are curated specifically for midwifery and maternity care — narrower and more relevant than general databases.",
+      "Use the Topic filters on the left to drill into subtopics such as Antenatal Care, Labour, or Postnatal Care.",
+      "Note the journal title and DOI of papers you want in full, then search for them in PubMed or via your library's journal list.",
+    ],
+    tip:"MIDIRS is small but very precise — use it specifically for midwifery practice questions where general databases return too much noise.",
+  },
+  {
+    name:"AMED", color:"#1abc9c",
+    coverage:"Allied & Complementary Medicine — physiotherapy, OT, complementary therapies",
+    getUrl: q => `https://search.ebscohost.com/login.aspx?direct=true&db=amed&bquery=${encodeURIComponent(q)}&type=1&site=ehost-live`,
+    steps:[
+      "Click Open AMED — you'll land on EBSCOhost (same platform as CINAHL). Log in with your credentials.",
+      "Your query is pre-loaded. AMED covers complementary medicine and allied health professions comprehensively.",
+      "Use Full Text and Peer Reviewed checkboxes in the left sidebar.",
+      "AMED is particularly valuable for acupuncture, physiotherapy, occupational therapy, and palliative care topics.",
+      "If your institution doesn't have AMED access, the British Library provides document delivery for individual articles.",
+    ],
+    tip:"For non-pharmacological interventions, AMED often surfaces evidence not indexed in PubMed or CINAHL.",
+  },
+  {
+    name:"PsycINFO", color:"#d35400",
+    coverage:"Psychology & mental health — behaviour, psychiatry, psychosocial interventions",
+    getUrl: q => `https://search.ebscohost.com/login.aspx?direct=true&db=psyh&bquery=${encodeURIComponent(q)}&type=1&site=ehost-live`,
+    steps:[
+      "Click Open PsycINFO — opens via EBSCOhost. Log in with institutional or Athens credentials.",
+      "Your query is pre-loaded. PsycINFO uses structured Descriptor terms (equivalent to MeSH in PubMed).",
+      "After your keyword search, click a relevant Descriptor term to expand or narrow with controlled vocabulary.",
+      "Use Peer Reviewed, set a publication date range, and optionally filter by Population Group or Age Group.",
+      "Essential for topics involving mental health, behaviour change, trauma, or psychosocial wellbeing.",
+    ],
+    tip:"After an initial search, use the Thesaurus feature to find the official Descriptor for your topic — this dramatically improves recall.",
+  },
+  {
+    name:"Cochrane Library", color:"#c0392b",
+    coverage:"Gold-standard systematic reviews and RCTs — highest evidence level",
+    getUrl: q => `https://www.cochranelibrary.com/search?searchBy=6&searchText=${encodeURIComponent(q)}`,
+    steps:[
+      "Click Open Cochrane — your query is pre-loaded in the search field.",
+      "Cochrane Review abstracts are free globally. Full reviews require institutional access (most universities subscribe).",
+      "The CENTRAL database within Cochrane contains the world's largest registry of RCTs.",
+      "Filter by Review Type: Cochrane Review for systematic reviews, or Trial for individual RCTs.",
+      "Each Cochrane Review includes a Plain Language Summary — ideal for quickly understanding the evidence base.",
+    ],
+    tip:"A Cochrane Review on your topic is the strongest possible evidence to cite. If one exists, read it before all other sources.",
+  },
+];
+
+const WORKAROUNDS = [
+  { icon:"🔓", name:"Unpaywall", type:"legal", desc:"Automatically finds legal free versions of paywalled papers via preprints, institutional repositories, and author manuscripts. Already integrated into this tool.", url:"https://unpaywall.org", urlLabel:"Get browser extension" },
+  { icon:"🟢", name:"Open Access Button", type:"legal", desc:"Finds legal preprint or repository versions of paywalled papers. Can also send automated requests directly to authors for a copy.", url:"https://openaccessbutton.org", urlLabel:"Visit oabutton.org" },
+  { icon:"🏛️", name:"PubMed Central (PMC)", type:"free", desc:"All NIH-funded research is freely deposited here. Many journals with paywalls have identical free PMC versions of the same article.", url:"https://www.ncbi.nlm.nih.gov/pmc/", urlLabel:"Search PMC free" },
+  { icon:"📄", name:"medRxiv / bioRxiv", type:"free", desc:"Preprint servers hosting early versions of health and life science papers — freely available, often months before formal journal publication.", url:"https://www.medrxiv.org", urlLabel:"Browse medRxiv" },
+  { icon:"📧", name:"Email the Author", type:"tip", desc:"Authors are almost always happy to share their own work. Find their institutional email on ResearchGate or their university staff page.", url:"https://www.researchgate.net", urlLabel:"Find authors on ResearchGate" },
+  { icon:"🏫", name:"Interlibrary Loan (ILL)", type:"free", desc:"Registered with any university or NHS library? Request any paywalled paper for free via ILL — most requests fulfilled within 24–48 hours.", url:"https://www.bl.uk/services/document-supply", urlLabel:"British Library Document Supply" },
+];
+
+// ── Components ─────────────────────────────────────────────────────────────────
+
+function StudyBadge({ type }) {
+  if (!type) return null;
+  const cls = STUDY_TYPE_CSS[type];
+  if (!cls) return null;
+  return <span className={`st-badge ${cls}`}>{type}</span>;
+}
+
+function EvBadge({ level }) {
+  if (!level) return null;
+  const cls = { HIGH:"ev-high", MODERATE:"ev-moderate", LOW:"ev-low", MIXED:"ev-mixed" }[level.toUpperCase()] || "ev-mixed";
+  return <span className={`ai-ev ${cls}`}>Evidence: {level}</span>;
+}
+
+// ── App ────────────────────────────────────────────────────────────────────────
+
+function App() {
+  const [kw, setKw] = useState("postnatal depression maternal mental health");
+  const [searchMode, setSearchMode] = useState("free"); // "free" | "pico"
+  const [pico, setPico] = useState({ p: "", i: "", c: "", o: "" });
+
+  const [apiKey, setApiKey] = useState("");
+  const [apiKeyInput, setApiKeyInput] = useState("");
+  const [showKeyInput, setShowKeyInput] = useState(false);
+
+  const [yearFrom, setYearFrom] = useState("");
+  const [yearTo, setYearTo] = useState("");
+  const [oaOnly, setOaOnly] = useState(false);
+  const [autoBatchOA, setAutoBatchOA] = useState(false);
+  const [showAdvanced, setShowAdvanced] = useState(false);
+
+  const [results, setResults] = useState({ pubmed:[], europepmc:[], semanticscholar:[], openalex:[], crossref:[], doaj:[] });
+  const [loading, setLoading] = useState({ pubmed:false, europepmc:false, semanticscholar:false, openalex:false, crossref:false, doaj:false });
+  const [errors, setErrors] = useState({});
+  const [activeSource, setActiveSource] = useState("all");
+  const [sortBy, setSortBy] = useState("relevance");
+  const [aiSummary, setAiSummary] = useState(null);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiDismissed, setAiDismissed] = useState(false);
+  const [oaStatus, setOaStatus] = useState({});
+  const [openDb, setOpenDb] = useState(null);
+  const [hasSearched, setHasSearched] = useState(false);
+  const [toast, setToast] = useState(null);
+  const [showExport, setShowExport] = useState(false);
+  const [bookmarks, setBookmarks] = useState(new Set());
+  const [showBookmarks, setShowBookmarks] = useState(false);
+  const [expandedAbstracts, setExpandedAbstracts] = useState(new Set());
+  const [searchHistory, setSearchHistory] = useState(() => {
+    try { return JSON.parse(sessionStorage.getItem("medlit-history") || "[]"); } catch { return []; }
+  });
+
+  const toastRef = useRef(null);
+  const exportRef = useRef(null);
+
+  // Close export menu on outside click
+  useEffect(() => {
+    if (!showExport) return;
+    const handler = e => { if (exportRef.current && !exportRef.current.contains(e.target)) setShowExport(false); };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [showExport]);
+
+  const showToast = msg => {
+    setToast(msg);
+    if (toastRef.current) clearTimeout(toastRef.current);
+    toastRef.current = setTimeout(() => setToast(null), 3200);
+  };
+
+  const effectiveQuery = searchMode === "pico"
+    ? buildPicoQuery(pico.p, pico.i, pico.c, pico.o)
+    : kw;
+
+  const runSearch = useCallback(async (overrideQ) => {
+    const q = overrideQ !== undefined ? overrideQ : effectiveQuery;
+    if (!q.trim()) return;
+    if (overrideQ !== undefined) { setSearchMode("free"); setKw(overrideQ); }
+
+    setHasSearched(true);
+    setResults({ pubmed:[], europepmc:[], semanticscholar:[], openalex:[], crossref:[], doaj:[] });
+    setErrors({}); setOaStatus({});
+    setAiSummary(null); setAiDismissed(false);
+    setActiveSource("all"); setShowBookmarks(false);
+    setExpandedAbstracts(new Set());
+
+    // Save to history
+    setSearchHistory(prev => {
+      const next = [q.trim(), ...prev.filter(h => h !== q.trim())].slice(0, 5);
+      try { sessionStorage.setItem("medlit-history", JSON.stringify(next)); } catch {}
+      return next;
+    });
+
+    const SOURCES = [
+      { key:"pubmed",          fn:searchPubMed },
+      { key:"europepmc",       fn:searchEuropePMC },
+      { key:"semanticscholar", fn:searchSemanticScholar },
+      { key:"openalex",        fn:searchOpenAlex },
+      { key:"crossref",        fn:searchCrossRef },
+      { key:"doaj",            fn:searchDOAJ },
+    ];
+
+    let accumulated = { pubmed:[], europepmc:[], semanticscholar:[], openalex:[], crossref:[], doaj:[] };
+
+    const promises = SOURCES.map(({ key, fn }) => {
+      setLoading(l => ({ ...l, [key]: true }));
+      return fn(q.trim())
+        .then(data => { setResults(r => ({ ...r, [key]: data })); accumulated[key] = data; })
+        .catch(err => setErrors(e => ({ ...e, [key]: err.message })))
+        .finally(() => setLoading(l => ({ ...l, [key]: false })));
+    });
+
+    Promise.allSettled(promises).then(() => {
+      const all = dedup([...accumulated.pubmed, ...accumulated.europepmc, ...accumulated.semanticscholar, ...accumulated.openalex, ...accumulated.crossref, ...accumulated.doaj]);
+
+      if (all.length >= 3 && apiKey) {
+        setAiLoading(true);
+        summarizeWithAI(all, q.trim(), apiKey)
+          .then(s => setAiSummary(s))
+          .catch(err => showToast("AI synthesis error: " + err.message))
+          .finally(() => setAiLoading(false));
+      }
+
+      if (autoBatchOA) {
+        const toCheck = all.filter(r => r.doi && !r.oaChecked);
+        let delay = 0;
+        toCheck.forEach(r => {
+          delay += 350;
+          setTimeout(() => {
+            setOaStatus(s => ({ ...s, [r.id]: { checking: true } }));
+            checkUnpaywall(r.doi)
+              .then(res => setOaStatus(s => ({ ...s, [r.id]: { ...res, checking: false } })))
+              .catch(() => setOaStatus(s => ({ ...s, [r.id]: { isOA: false, pdfUrl: null, checking: false } })));
+          }, delay);
+        });
+        if (toCheck.length) showToast(`Checking OA status for ${toCheck.length} papers via Unpaywall…`);
+      }
+    });
+  }, [effectiveQuery, apiKey, autoBatchOA]);
+
+  const handleCheckOA = async (doi, id) => {
+    if (!doi || oaStatus[id]) return;
+    setOaStatus(s => ({ ...s, [id]: { checking: true } }));
+    try {
+      const res = await checkUnpaywall(doi);
+      setOaStatus(s => ({ ...s, [id]: { ...res, checking: false } }));
+      if (res.isOA) showToast("✓ Free version found via Unpaywall!");
+      else showToast("No free legal version found. Try emailing the author.");
+    } catch {
+      setOaStatus(s => ({ ...s, [id]: { isOA: false, pdfUrl: null, checking: false } }));
+    }
+  };
+
+  const toggleBookmark = id => {
+    setBookmarks(s => {
+      const next = new Set(s);
+      if (next.has(id)) { next.delete(id); } else { next.add(id); }
+      return next;
+    });
+  };
+
+  const toggleAbstract = id => {
+    setExpandedAbstracts(s => {
+      const next = new Set(s);
+      if (next.has(id)) { next.delete(id); } else { next.add(id); }
+      return next;
+    });
+  };
+
+  const allResults = dedup([...results.pubmed, ...results.europepmc, ...results.semanticscholar, ...results.openalex, ...results.crossref, ...results.doaj]);
+  let displayed = activeSource === "all" ? allResults : (results[activeSource] || []);
+  if (oaOnly) displayed = displayed.filter(r => r.isOA || oaStatus[r.id]?.isOA);
+  if (yearFrom) displayed = displayed.filter(r => parseInt(r.year) >= parseInt(yearFrom));
+  if (yearTo) displayed = displayed.filter(r => parseInt(r.year) <= parseInt(yearTo));
+  if (showBookmarks) displayed = displayed.filter(r => bookmarks.has(r.id));
+  const sorted = [...displayed].sort((a, b) => sortBy === "year" ? (parseInt(b.year)||0) - (parseInt(a.year)||0) : 0);
+  const isLoading = Object.values(loading).some(Boolean);
+  const activeFilterCount = [yearFrom, yearTo, oaOnly, autoBatchOA].filter(Boolean).length;
+
+  const handleExport = type => {
+    setShowExport(false);
+    if (!sorted.length) { showToast("No results to export."); return; }
+    if (type === "text") {
+      const txt = sorted.map(r => `${r.title} (${r.year})${r.journal ? ` — ${r.journal}` : ""}\n${r.doi || r.link}`).join("\n\n");
+      navigator.clipboard.writeText(txt).then(() => showToast(`✓ ${sorted.length} references copied`));
+    } else if (type === "bibtex") {
+      downloadFile(toBibTeX(sorted), "medlit-references.bib", "text/plain");
+    } else if (type === "ris") {
+      downloadFile(toRIS(sorted), "medlit-references.ris", "text/plain");
+    } else if (type === "csv") {
+      downloadFile(toCSV(sorted), "medlit-references.csv", "text/csv");
+    }
+  };
+
+  const SOURCES_LIST = [
+    { key:"all",            label:"All Results",        count:allResults.length },
+    { key:"pubmed",         label:"PubMed",             count:results.pubmed.length },
+    { key:"europepmc",      label:"Europe PMC",         count:results.europepmc.length },
+    { key:"semanticscholar",label:"Semantic Scholar",   count:results.semanticscholar.length },
+    { key:"openalex",       label:"OpenAlex",           count:results.openalex.length },
+    { key:"crossref",       label:"CrossRef",           count:results.crossref.length },
+    { key:"doaj",           label:"DOAJ",               count:results.doaj.length },
+  ];
+
+  const picoPreview = buildPicoQuery(pico.p, pico.i, pico.c, pico.o);
+
+  return (
+    <div className="app">
+
+      {/* Header */}
+      <header className="header">
+        <div className="header-inner">
+          <div className="brand">
+            <div className="brand-mark">⚕</div>
+            <div>
+              <div className="brand-name">MedLit Search</div>
+              <div className="brand-sub">6 free databases · Unpaywall · AI synthesis · Guided paywall access</div>
+            </div>
+            <div className="brand-actions">
+              <button
+                className={`hdr-btn ${apiKey ? "active" : ""}`}
+                onClick={() => setShowKeyInput(v => !v)}
+              >
+                ⚙ {apiKey ? "API Key ✓" : "Add API Key"}
+              </button>
+            </div>
+          </div>
+
+          {showKeyInput && (
+            <div className="key-banner">
+              <div className="key-banner-text">
+                {apiKey
+                  ? "✓ Anthropic API key saved. AI synthesis is active."
+                  : "Enter your Anthropic API key to enable AI evidence synthesis. Key is used only in-session and never stored."}
+              </div>
+              <input
+                className="key-input"
+                type="password"
+                placeholder="sk-ant-..."
+                value={apiKeyInput}
+                onChange={e => setApiKeyInput(e.target.value)}
+                onKeyDown={e => { if (e.key === "Enter") { setApiKey(apiKeyInput); setShowKeyInput(false); showToast("✓ API key saved for this session"); }}}
+              />
+              <button className="key-save-btn" onClick={() => { setApiKey(apiKeyInput); setShowKeyInput(false); showToast("✓ API key saved for this session"); }}>
+                Save
+              </button>
+              {apiKey && <button className="key-save-btn" style={{background:"var(--gray-500)"}} onClick={() => { setApiKey(""); setApiKeyInput(""); setShowKeyInput(false); }}>Remove</button>}
+            </div>
+          )}
+
+          {/* Mode toggle */}
+          <div className="mode-bar">
+            <span className="mode-lbl">Search mode:</span>
+            <button className={`mode-btn ${searchMode === "free" ? "active" : ""}`} onClick={() => setSearchMode("free")}>
+              Free Text
+            </button>
+            <button className={`mode-btn ${searchMode === "pico" ? "active" : ""}`} onClick={() => setSearchMode("pico")}>
+              PICO Framework
+            </button>
+          </div>
+
+          {/* PICO inputs */}
+          {searchMode === "pico" && (
+            <div style={{marginBottom:10}}>
+              <div className="pico-grid">
+                <div className="pico-field">
+                  <div className="pico-lbl"><span className="pico-dot pd-p">P</span>Population / Patient</div>
+                  <input className="pico-inp" placeholder="e.g. postmenopausal women" value={pico.p} onChange={e => setPico(v => ({...v, p: e.target.value}))} onKeyDown={e => e.key === "Enter" && runSearch()} />
+                </div>
+                <div className="pico-field">
+                  <div className="pico-lbl"><span className="pico-dot pd-i">I</span>Intervention</div>
+                  <input className="pico-inp" placeholder="e.g. hormone replacement therapy" value={pico.i} onChange={e => setPico(v => ({...v, i: e.target.value}))} onKeyDown={e => e.key === "Enter" && runSearch()} />
+                </div>
+                <div className="pico-field">
+                  <div className="pico-lbl"><span className="pico-dot pd-c">C</span>Comparison <span style={{fontWeight:400,textTransform:"none",fontSize:"10px",color:"var(--gray-400)"}}>optional</span></div>
+                  <input className="pico-inp" placeholder="e.g. placebo or no treatment" value={pico.c} onChange={e => setPico(v => ({...v, c: e.target.value}))} onKeyDown={e => e.key === "Enter" && runSearch()} />
+                </div>
+                <div className="pico-field">
+                  <div className="pico-lbl"><span className="pico-dot pd-o">O</span>Outcome</div>
+                  <input className="pico-inp" placeholder="e.g. cardiovascular events mortality" value={pico.o} onChange={e => setPico(v => ({...v, o: e.target.value}))} onKeyDown={e => e.key === "Enter" && runSearch()} />
+                </div>
+              </div>
+              {picoPreview && (
+                <div className="pico-preview">
+                  <div className="pico-preview-lbl">Built query</div>
+                  {picoPreview}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Free text search */}
+          {searchMode === "free" && (
+            <div className="search-row">
+              <div className="search-wrap">
+                <span className="search-ico">🔍</span>
+                <input
+                  className="search-input"
+                  value={kw}
+                  onChange={e => setKw(e.target.value)}
+                  onKeyDown={e => e.key === "Enter" && runSearch()}
+                  placeholder="Enter your research topic…"
+                />
+              </div>
+              <button className="search-btn" onClick={() => runSearch()} disabled={isLoading || !kw.trim()}>
+                {isLoading ? <><div className="spinner" />Searching…</> : <>Search</>}
+              </button>
+            </div>
+          )}
+
+          {searchMode === "pico" && (
+            <div className="search-row" style={{marginTop:8}}>
+              <button className="search-btn" style={{flex:"none"}} onClick={() => runSearch()} disabled={isLoading || !picoPreview.trim()}>
+                {isLoading ? <><div className="spinner" />Searching…</> : <>Search PICO query</>}
+              </button>
+            </div>
+          )}
+
+          {/* Advanced filters */}
+          <div className="adv-bar">
+            <button className={`adv-btn ${showAdvanced ? "active" : ""}`} onClick={() => setShowAdvanced(v => !v)}>
+              ⚙ Filters
+              {activeFilterCount > 0 && <span className="adv-n">{activeFilterCount}</span>}
+            </button>
+            {searchHistory.length > 0 && (
+              <div className="hist-bar">
+                <span className="hist-lbl">Recent:</span>
+                {searchHistory.map((h, i) => (
+                  <button key={i} className="hist-pill" title={h} onClick={() => runSearch(h)}>{h}</button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {showAdvanced && (
+            <div className="adv-panel">
+              <div className="filter-grp">
+                <div className="filter-lbl">Year range</div>
+                <div className="yr-row">
+                  <input className="yr-inp" type="number" placeholder="From" value={yearFrom} onChange={e => setYearFrom(e.target.value)} min="1900" max="2099" />
+                  <span className="yr-sep">—</span>
+                  <input className="yr-inp" type="number" placeholder="To" value={yearTo} onChange={e => setYearTo(e.target.value)} min="1900" max="2099" />
+                </div>
+              </div>
+              <div className="filter-grp">
+                <div className="filter-lbl">Access</div>
+                <label className="check-row">
+                  <input type="checkbox" checked={oaOnly} onChange={e => setOaOnly(e.target.checked)} />
+                  <span className="check-lbl">Open Access only</span>
+                </label>
+              </div>
+              <div className="filter-grp">
+                <div className="filter-lbl">Unpaywall</div>
+                <label className="check-row">
+                  <input type="checkbox" checked={autoBatchOA} onChange={e => setAutoBatchOA(e.target.checked)} />
+                  <span className="check-lbl">Auto-check OA for all results</span>
+                </label>
+              </div>
+              {(yearFrom || yearTo || oaOnly) && (
+                <button className="adv-btn" style={{alignSelf:"flex-end"}} onClick={() => { setYearFrom(""); setYearTo(""); setOaOnly(false); }}>
+                  Clear filters
+                </button>
+              )}
+            </div>
+          )}
+        </div>
+      </header>
+
+      <main className="main">
+
+        {/* Empty state */}
+        {!hasSearched && (
+          <div className="empty">
+            <div className="empty-ico">📚</div>
+            <div className="empty-title">Search the medical literature</div>
+            <div className="empty-desc">
+              Enter your topic above and press Search. Results stream in from 6 databases simultaneously. Use PICO mode to build structured clinical questions. Find free full text via Unpaywall, and get AI evidence synthesis with your Anthropic API key.
+            </div>
+            <div className="db-chips">
+              {["PubMed","Europe PMC","Semantic Scholar","OpenAlex","CrossRef","DOAJ (OA only)"].map(d => <span key={d} className="db-chip">{d}</span>)}
+            </div>
+            <div className="example-queries">
+              <div className="example-lbl">Try an example</div>
+              <div className="example-wrap">
+                {EXAMPLE_QUERIES.map(q => (
+                  <button key={q} className="example-q" onClick={() => { setKw(q); setSearchMode("free"); setTimeout(() => runSearch(q), 0); }}>{q}</button>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {hasSearched && (
+          <>
+            {/* Source tabs */}
+            <div className="source-row">
+              <span className="source-label">Source:</span>
+              {SOURCES_LIST.map(s => (
+                <button key={s.key} className={`src-pill ${activeSource === s.key ? "active" : ""}`} onClick={() => setActiveSource(s.key)}>
+                  {s.label}
+                  <span className="pill-n">{loading[s.key] ? "…" : s.count}</span>
+                </button>
+              ))}
+            </div>
+
+            {/* Errors */}
+            {Object.entries(errors).map(([key, msg]) => (
+              <div key={key} className="err-bar">⚠ {SOURCE_META[key]?.label}: {msg}</div>
+            ))}
+
+            {/* AI Panel — loading or results */}
+            {(aiLoading || (aiSummary && !aiDismissed)) && (
+              <div className="ai-panel">
+                <div className="ai-top">
+                  <div className="ai-badge"><div className="ai-dot" /> AI Evidence Synthesis</div>
+                  {aiSummary && <EvBadge level={aiSummary.evidence_level} />}
+                  {aiSummary && <button className="ai-dismiss" onClick={() => setAiDismissed(true)}>✕</button>}
+                </div>
+
+                {aiLoading && !aiSummary && (
+                  <div className="ai-loading-msg">
+                    <div className="mini-spin" />
+                    Analysing {allResults.length} papers and synthesising the evidence…
+                  </div>
+                )}
+
+                {aiSummary && (
+                  <>
+                    {aiSummary.overview && (
+                      <div className="ai-overview">{aiSummary.overview}</div>
+                    )}
+
+                    {aiSummary.study_types?.length > 0 && (
+                      <div className="ai-section">
+                        <div className="ai-section-lbl">Study types identified</div>
+                        <div className="ai-types">
+                          {aiSummary.study_types.map((t, i) => <span key={i} className="ai-type-chip">{t}</span>)}
+                        </div>
+                      </div>
+                    )}
+
+                    {aiSummary.themes?.length > 0 && (
+                      <div className="ai-section">
+                        <div className="ai-section-lbl">Key themes</div>
+                        <div className="ai-themes">
+                          {aiSummary.themes.map((t, i) => <span key={i} className="ai-tag">📌 {t}</span>)}
+                        </div>
+                      </div>
+                    )}
+
+                    {aiSummary.clinical_implications && (
+                      <div className="ai-clinical">
+                        <div className="ai-clinical-lbl">Clinical implications</div>
+                        <div className="ai-clinical-txt">{aiSummary.clinical_implications}</div>
+                      </div>
+                    )}
+
+                    {aiSummary.gaps && (
+                      <div className="ai-gaps-wrap">
+                        <div className="ai-gaps-label">Research gaps</div>
+                        <div className="ai-gaps">{aiSummary.gaps}</div>
+                      </div>
+                    )}
+
+                    {aiSummary.suggested_terms?.length > 0 && (
+                      <div className="ai-section">
+                        <div className="ai-suggest-lbl">Try these related searches</div>
+                        <div className="ai-suggest-wrap">
+                          {aiSummary.suggested_terms.map((t, i) => (
+                            <button key={i} className="ai-suggest-tag" onClick={() => runSearch(t)}>{t}</button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+            )}
+
+            {/* AI prompt — no key, has results */}
+            {!apiKey && !aiLoading && !aiSummary && hasSearched && allResults.length > 0 && (
+              <div className="ai-panel">
+                <div className="ai-top"><div className="ai-badge">✦ AI Synthesis</div></div>
+                <div className="ai-no-key">
+                  Add your <strong>Anthropic API key</strong> via the ⚙ button above to enable AI evidence synthesis — a narrative overview, key themes, study type breakdown, evidence quality rating, clinical implications, and research gap analysis across all results.
+                </div>
+              </div>
+            )}
+
+            {/* Loading progress */}
+            {isLoading && sorted.length === 0 && (
+              <div className="loading-sources">
+                {SOURCES_LIST.slice(1).map(s => (
+                  <div key={s.key} className="loading-src">
+                    {loading[s.key] ? <div className="mini-spin" /> : <div className="done-dot">✓</div>}
+                    {s.label}
+                    {!loading[s.key] && <span style={{marginLeft:"auto",fontSize:12,color:"var(--gray-400)"}}>{s.count} results</span>}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Bookmarks bar */}
+            {bookmarks.size > 0 && (
+              <div className="bk-bar">
+                <span className="bk-count-txt">🔖 {bookmarks.size} bookmarked</span>
+                <button className="bk-view" onClick={() => setShowBookmarks(v => !v)}>
+                  {showBookmarks ? "Show all results" : "View bookmarks only"}
+                </button>
+                <button className="bk-clear" onClick={() => { setBookmarks(new Set()); setShowBookmarks(false); }}>Clear all</button>
+              </div>
+            )}
+
+            {/* Toolbar */}
+            {sorted.length > 0 && (
+              <div className="toolbar">
+                <span className="res-count">
+                  {sorted.length} paper{sorted.length !== 1 ? "s" : ""}
+                  {activeSource !== "all" ? ` · ${SOURCE_META[activeSource]?.label}` : " · all sources (deduplicated)"}
+                  {(oaOnly || yearFrom || yearTo) && " · filtered"}
+                </span>
+                <div className="toolbar-right">
+                  <select className="sort-sel" value={sortBy} onChange={e => setSortBy(e.target.value)}>
+                    <option value="relevance">Sort: Relevance</option>
+                    <option value="year">Sort: Year (newest first)</option>
+                  </select>
+                  <div className="export-wrap" ref={exportRef}>
+                    <button className="export-btn" onClick={() => setShowExport(v => !v)}>
+                      ⎘ Export ▾
+                    </button>
+                    {showExport && (
+                      <div className="export-menu">
+                        <button className="export-item" onClick={() => handleExport("text")}>📋 Copy plain text</button>
+                        <button className="export-item" onClick={() => handleExport("bibtex")}>📄 Download BibTeX (.bib)</button>
+                        <button className="export-item" onClick={() => handleExport("ris")}>📄 Download RIS (.ris)</button>
+                        <button className="export-item" onClick={() => handleExport("csv")}>📊 Download CSV (.csv)</button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Results */}
+            <div>
+              {sorted.map((r, i) => {
+                const oa = oaStatus[r.id];
+                const freePdf = r.pdfUrl || oa?.pdfUrl;
+                const hasFree = r.isOA || r.pdfUrl || oa?.isOA;
+                const isExpanded = expandedAbstracts.has(r.id);
+                const needsExpand = r.abstract && r.abstract.length > 280;
+                const displayAbstract = isExpanded || !needsExpand ? r.abstract : truncateDisplay(r.abstract);
+
+                return (
+                  <div className="result-card" key={r.id} style={{ animationDelay: `${Math.min(i, 12) * 0.025}s` }}>
+                    <div className="card-top">
+                      <div className="card-title">
+                        {r.doi || r.link
+                          ? <a href={r.doi || r.link} target="_blank" rel="noreferrer">{r.title}</a>
+                          : r.title}
+                      </div>
+                      <div className="card-badges">
+                        <span className={`src-badge ${SOURCE_META[r.source]?.badge}`}>{SOURCE_META[r.source]?.label}</span>
+                        {r.studyType && <StudyBadge type={r.studyType} />}
+                      </div>
+                    </div>
+
+                    <div className="card-meta">
+                      {r.year && <span className="meta-year">{r.year}</span>}
+                      {r.journal && <><span className="meta-sep">·</span><span className="meta-journal">{r.journal}</span></>}
+                      {r.authors && <><span className="meta-sep">·</span><span className="meta-authors">{r.authors}</span></>}
+                      {r.citationCount != null && r.citationCount > 0 && (
+                        <><span className="meta-sep">·</span><span className="meta-cite">📎 {r.citationCount} citations</span></>
+                      )}
+                    </div>
+
+                    <div className="card-abstract">
+                      {displayAbstract || <span style={{color:"var(--gray-400)",fontStyle:"italic"}}>No abstract available. Click View Paper to read the full text.</span>}
+                    </div>
+                    {needsExpand && (
+                      <button className="abstract-more" onClick={() => toggleAbstract(r.id)}>
+                        {isExpanded ? "Show less ▲" : "Show full abstract ▼"}
+                      </button>
+                    )}
+
+                    <div className="card-footer">
+                      {(r.doi || r.link) && (
+                        <a className="lbtn lbtn-primary" href={r.doi || r.link} target="_blank" rel="noreferrer">↗ View Paper</a>
+                      )}
+                      {freePdf && (
+                        <a className="lbtn lbtn-green" href={freePdf} target="_blank" rel="noreferrer">↓ Free PDF</a>
+                      )}
+                      {!freePdf && r.doi && !oa && (
+                        <button className="lbtn lbtn-amber" onClick={() => handleCheckOA(r.doi, r.id)} disabled={oa?.checking}>
+                          {oa?.checking ? "Checking…" : "🔓 Find Free Version"}
+                        </button>
+                      )}
+                      {oa && !oa.isOA && !oa.checking && (
+                        <span className="lbtn lbtn-gray">No free version found</span>
+                      )}
+                      {hasFree && <span className="oa-flag">Open Access</span>}
+                      <button
+                        className={`bk-btn ${bookmarks.has(r.id) ? "saved" : ""}`}
+                        onClick={() => toggleBookmark(r.id)}
+                        title={bookmarks.has(r.id) ? "Remove bookmark" : "Bookmark this paper"}
+                        style={{marginLeft:"auto"}}
+                      >
+                        {bookmarks.has(r.id) ? "🔖" : "🏷"}
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {hasSearched && !isLoading && sorted.length === 0 && allResults.length > 0 && (
+              <div style={{textAlign:"center",padding:"32px 20px",color:"var(--gray-400)",fontSize:14}}>
+                No results match the current filters. <button style={{color:"var(--blue-500)",background:"none",border:"none",cursor:"pointer",fontFamily:"inherit",fontSize:14}} onClick={() => { setYearFrom(""); setYearTo(""); setOaOnly(false); setShowBookmarks(false); }}>Clear filters</button>
+              </div>
+            )}
+          </>
+        )}
+
+        {/* Paywall Guide */}
+        <div className="section">
+          <div className="sec-hd">
+            <div className="sec-ico sec-ico-amber">🗝</div>
+            <div className="sec-title">Guided Paywall Database Access</div>
+          </div>
+          <div className="sec-desc">
+            Click any Open button below — your current search keywords are pre-loaded. Log in with institutional credentials and your results will be waiting. Expand each database for step-by-step instructions.
+          </div>
+          {PAYWALL_DBS.map(db => (
+            <div className="pw-db" key={db.name}>
+              <div className="pw-db-hd" onClick={() => setOpenDb(openDb === db.name ? null : db.name)}>
+                <div className="pw-hd-left">
+                  <div className="db-dot" style={{ background: db.color }} />
+                  <div>
+                    <div className="db-name">{db.name}</div>
+                    <div className="db-coverage">{db.coverage}</div>
+                  </div>
+                </div>
+                <div className="pw-hd-right">
+                  <a className="db-open" href={db.getUrl(effectiveQuery || kw)} target="_blank" rel="noreferrer" onClick={e => e.stopPropagation()}>
+                    Open {db.name} ↗
+                  </a>
+                  <span className={`chev ${openDb === db.name ? "open" : ""}`}>▼</span>
+                </div>
+              </div>
+              {openDb === db.name && (
+                <div className="pw-db-body">
+                  <div className="steps">
+                    {db.steps.map((s, i) => (
+                      <div className="step" key={i}>
+                        <div className="step-n">{i + 1}</div>
+                        <div className="step-txt">
+                          {s}
+                          {i === db.steps.length - 1 && db.tip && (
+                            <div><span className="step-tip">💡 Tip: {db.tip}</span></div>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+
+        {/* Workarounds */}
+        <div className="section">
+          <div className="sec-hd">
+            <div className="sec-ico sec-ico-teal">🔓</div>
+            <div className="sec-title">Legal Ways to Access Paywalled Papers</div>
+          </div>
+          <div className="sec-desc">
+            You don't always need institutional access. These methods are legal, free, and often faster than you'd expect.
+          </div>
+          <div className="wk-grid">
+            {WORKAROUNDS.map(w => (
+              <div className="wk-card" key={w.name}>
+                <div className="wk-top">
+                  <span className="wk-icon">{w.icon}</span>
+                  <span className="wk-name">{w.name}</span>
+                  <span className={`wk-type ${w.type === "free" ? "t-free" : w.type === "legal" ? "t-legal" : "t-tip"}`}>
+                    {w.type === "free" ? "Free" : w.type === "legal" ? "Legal OA" : "Tip"}
+                  </span>
+                </div>
+                <div className="wk-desc">{w.desc}</div>
+                <a className="wk-link" href={w.url} target="_blank" rel="noreferrer">{w.urlLabel} ↗</a>
+              </div>
+            ))}
+          </div>
+        </div>
+
+      </main>
+
+      <div className="footer">
+        MedLit Search · Queries PubMed, Europe PMC, Semantic Scholar, OpenAlex, CrossRef and DOAJ simultaneously ·
+        Free versions via <a href="https://unpaywall.org" target="_blank" rel="noreferrer">Unpaywall</a> ·
+        Built for clinical researchers and students
+      </div>
+
+      {toast && <div className="toast">{toast}</div>}
+    </div>
+  );
+}
+
+const root = ReactDOM.createRoot(document.getElementById("root"));
+root.render(<App />);
+</script>
+</body>
+</html>
