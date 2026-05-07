@@ -278,6 +278,30 @@
     .sectitle{font-family:var(--fd);font-size:19px;font-weight:600;color:var(--tx1);}
     .secdesc{font-size:13px;color:var(--tx3);margin-bottom:18px;line-height:1.65;padding-left:40px;}
 
+    /* Connection bar */
+    .conn-bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:8px 0 12px;border-bottom:1px solid rgba(255,255,255,.1);margin-bottom:12px;}
+    .conn-field{display:flex;align-items:center;gap:6px;flex:1;min-width:180px;}
+    .conn-ico{font-size:13px;flex-shrink:0;}
+    .conn-input{flex:1;padding:6px 10px;background:rgba(255,255,255,.1);border:1.5px solid rgba(255,255,255,.16);border-radius:var(--rsm);font-family:var(--fb);font-size:12px;color:white;outline:none;transition:border-color .15s;}
+    .conn-input::placeholder{color:rgba(255,255,255,.3);}
+    .conn-input:focus{border-color:var(--teal-500);}
+    .conn-save{padding:6px 14px;background:var(--teal-600);color:white;border:none;border-radius:var(--rsm);font-family:var(--fb);font-size:12px;font-weight:700;cursor:pointer;transition:background .15s;white-space:nowrap;}
+    .conn-save:hover{background:var(--teal-700);}
+    .conn-status{display:flex;align-items:center;gap:5px;font-size:11px;font-weight:600;}
+    .cs-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+    .cs-on{background:var(--teal-500);}
+    .cs-off{background:rgba(255,255,255,.25);}
+
+    /* Paywall strip */
+    .pw-strip{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:var(--r);padding:12px 16px;margin-bottom:16px;animation:fdUp .3s ease both;}
+    .pw-strip-hd{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+    .pw-strip-lbl{font-size:12px;font-weight:700;color:var(--tx3);}
+    .pw-strip-note{font-size:11px;color:var(--tx4);}
+    .pw-dbs{display:flex;flex-wrap:wrap;gap:6px;}
+    .pw-db-btn{display:inline-flex;align-items:center;gap:4px;padding:5px 12px;border-radius:var(--rsm);font-size:12px;font-weight:700;text-decoration:none;border:1.5px solid;transition:all .15s;font-family:var(--fb);}
+    .pw-db-btn:hover{opacity:.85;transform:translateY(-1px);}
+    .pw-noproxy{font-size:12px;color:var(--tx4);font-style:italic;}
+
     /* Workarounds grid */
     .wkgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px;}
     .wkcard{background:var(--white);border:1.5px solid var(--bd);border-radius:var(--r);padding:16px 18px;box-shadow:var(--sh0);transition:all .15s;}
@@ -520,6 +544,17 @@ const ST_CSS = {"Systematic Review":"st-sr","RCT":"st-rct","Cohort":"st-cohort",
 
 const EXAMPLES = ["postnatal depression maternal mental health","nurse-led sepsis early recognition","hand hygiene compliance intensive care","breastfeeding support low-income populations","pressure injury prevention elderly","opioid pain management palliative care"];
 
+const PAYWALL_DBS = [
+  {name:"CINAHL",     color:"#2563eb", bg:"#dbeafe", getUrl:q=>`https://search.ebscohost.com/login.aspx?direct=true&db=cin20&bquery=${encodeURIComponent(q)}&type=1&site=ehost-live`},
+  {name:"Scopus",     color:"#b45309", bg:"#fef3c7", getUrl:q=>`https://www.scopus.com/search/form.uri?display=basic&query=${encodeURIComponent(q)}`},
+  {name:"Cochrane",   color:"#1d4ed8", bg:"#eff6ff", getUrl:q=>`https://www.cochranelibrary.com/search?searchBy=6&searchText=${encodeURIComponent(q)}`},
+  {name:"Web of Sci", color:"#991b1b", bg:"#fef2f2", getUrl:q=>`https://www.webofscience.com/wos/woscc/basic-search?query=${encodeURIComponent(q)}&field=ALL`},
+  {name:"PsycINFO",   color:"#9a3412", bg:"#fff7ed", getUrl:q=>`https://search.ebscohost.com/login.aspx?direct=true&db=psyh&bquery=${encodeURIComponent(q)}&type=1&site=ehost-live`},
+  {name:"AMED",       color:"#065f46", bg:"#ecfdf5", getUrl:q=>`https://search.ebscohost.com/login.aspx?direct=true&db=amed&bquery=${encodeURIComponent(q)}&type=1&site=ehost-live`},
+  {name:"ProQuest",   color:"#1e40af", bg:"#eff6ff", getUrl:q=>`https://search.proquest.com/search?query=${encodeURIComponent(q)}&searchtype=basic`},
+  {name:"MIDIRS",     color:"#6b21a8", bg:"#f5f3ff", getUrl:q=>`https://www.midirs.org/evidence/maternity-and-infant-care/search/?query=${encodeURIComponent(q)}`},
+];
+
 const WORKAROUNDS = [
   {icon:"🔓",name:"Unpaywall",type:"legal",desc:"Finds legal free versions of paywalled papers via preprints, repositories, and author manuscripts. Integrated into this tool.",url:"https://unpaywall.org",ul:"Get browser extension"},
   {icon:"🟢",name:"Open Access Button",type:"legal",desc:"Locates legal preprint or repository versions, and can send automated requests to authors for a copy.",url:"https://openaccessbutton.org",ul:"Visit oabutton.org"},
@@ -551,9 +586,9 @@ function App() {
   const [smartSearch, setSmartSearch] = useState(false);
   const [enhancedQuery, setEnhancedQuery] = useState(null);
 
-  const [apiKey, setApiKey] = useState("");
-  const [showSettings, setShowSettings] = useState(false);
-  const [apiKeyInput, setApiKeyInput] = useState("");
+  const [apiKey, setApiKey] = useState(() => localStorage.getItem("ml-api-key")||"");
+  const [apiKeyInput, setApiKeyInput] = useState(() => localStorage.getItem("ml-api-key")||"");
+  // eslint-disable-next-line no-unused-vars — kept for saveSettings parity
   const [institutionName, setInstitutionName] = useState(() => localStorage.getItem("ml-inst-name")||"");
   const [ezproxyUrl, setEzproxyUrl] = useState(() => localStorage.getItem("ml-ezproxy")||"");
   const [instNameInput, setInstNameInput] = useState(() => localStorage.getItem("ml-inst-name")||"");
@@ -595,8 +630,10 @@ function App() {
 
   const saveSettings = () => {
     setApiKey(apiKeyInput); setInstitutionName(instNameInput); setEzproxyUrl(ezproxyInput);
-    localStorage.setItem("ml-inst-name",instNameInput); localStorage.setItem("ml-ezproxy",ezproxyInput);
-    setShowSettings(false); showToast("✓ Settings saved");
+    localStorage.setItem("ml-api-key", apiKeyInput);
+    localStorage.setItem("ml-inst-name", instNameInput);
+    localStorage.setItem("ml-ezproxy", ezproxyInput);
+    showToast("✓ Settings saved — keys stored on this device");
   };
 
   const proxyLink = url => ezproxyUrl && url ? `${ezproxyUrl.replace(/\/$/,"")}${ezproxyUrl.includes("?")?"":"/login?url="}${encodeURIComponent(url)}` : url;
@@ -692,41 +729,61 @@ function App() {
             <div className="brand-mark">⚕</div>
             <div>
               <div className="brand-name">MedLit Search</div>
-              <div className="brand-sub">Clinical evidence platform · {institutionName||"6 free databases"}</div>
+              <div className="brand-sub">Clinical evidence platform{institutionName?` · ${institutionName}`:""}</div>
             </div>
             <div className="brand-btns">
-              <button className={`hbtn ${smartSearch?"on":""}`} onClick={()=>setSmartSearch(v=>!v)} title="Use Claude to optimize your search query">
+              <button className={`hbtn ${smartSearch?"on":""}`} onClick={()=>setSmartSearch(v=>!v)} title="Claude reformulates your query into optimised boolean before searching">
                 ✦ Smart Search {smartSearch?"ON":"OFF"}
-              </button>
-              <button className={`hbtn ${showSettings?"on":""}`} onClick={()=>setShowSettings(v=>!v)}>
-                ⚙ {apiKey?"Settings ✓":"Settings"}
               </button>
             </div>
           </div>
 
-          {showSettings && (
-            <div className="settings-panel">
-              <div className="sp-grid">
-                <div className="sp-field">
-                  <div className="sp-label">Anthropic API Key</div>
-                  <input className="sp-input" type="password" placeholder="sk-ant-…" value={apiKeyInput} onChange={e=>setApiKeyInput(e.target.value)} />
-                  <div className="sp-hint">Enables AI synthesis and Smart Search. Session only — never stored.</div>
-                </div>
-                <div className="sp-field">
-                  <div className="sp-label">Institution Name</div>
-                  <input className="sp-input" type="text" placeholder="e.g. University of Leeds" value={instNameInput} onChange={e=>setInstNameInput(e.target.value)} />
-                  <div className="sp-hint">Displayed in the header for context.</div>
-                </div>
-                <div className="sp-field" style={{gridColumn:"1/-1"}}>
-                  <div className="sp-label">EZproxy URL <span style={{textTransform:"none",fontWeight:400,color:"rgba(255,255,255,.35)"}}>— auto-proxies all paper links for institutional access</span></div>
-                  <input className="sp-input" type="text" placeholder="https://ezproxy.yourinstitution.ac.uk/login?url=" value={ezproxyInput} onChange={e=>setEzproxyInput(e.target.value)} style={{width:"100%"}} />
-                  <div className="sp-hint">Paste your institution's EZproxy prefix. All paper links will route through it so paywalled articles open automatically. You authenticate once per browser session at your institution's login page — no credentials stored here.</div>
-                  {ezproxyUrl && <div className="sp-proxy-active">✓ Proxy active — paper links routing through {ezproxyUrl.split("/")[2]}</div>}
-                </div>
-              </div>
-              <button className="sp-save" onClick={saveSettings}>Save Settings</button>
+          {/* Always-visible connection bar */}
+          <div className="conn-bar">
+            <div className="conn-field">
+              <span className="conn-ico">🔑</span>
+              <input
+                className="conn-input"
+                type="password"
+                placeholder="Anthropic API key (sk-ant-…)"
+                value={apiKeyInput}
+                onChange={e=>setApiKeyInput(e.target.value)}
+                onKeyDown={e=>e.key==="Enter"&&saveSettings()}
+              />
+              <span className="conn-status">
+                <span className={`cs-dot ${apiKey?"cs-on":"cs-off"}`}/>
+                <span style={{color:apiKey?"var(--teal-500)":"rgba(255,255,255,.35)",fontSize:11}}>{apiKey?"AI active":"No key"}</span>
+              </span>
             </div>
-          )}
+            <div className="conn-field">
+              <span className="conn-ico">🏛</span>
+              <input
+                className="conn-input"
+                type="text"
+                placeholder="Institution name (optional)"
+                value={instNameInput}
+                onChange={e=>setInstNameInput(e.target.value)}
+                onKeyDown={e=>e.key==="Enter"&&saveSettings()}
+              />
+            </div>
+            <div className="conn-field" style={{flexBasis:"100%"}}>
+              <span className="conn-ico">🔒</span>
+              <input
+                className="conn-input"
+                type="text"
+                placeholder="EZproxy URL — e.g. https://ezproxy.yourinstitution.ac.uk/login?url="
+                value={ezproxyInput}
+                onChange={e=>setEzproxyInput(e.target.value)}
+                onKeyDown={e=>e.key==="Enter"&&saveSettings()}
+                style={{flex:1}}
+              />
+              <span className="conn-status">
+                <span className={`cs-dot ${ezproxyUrl?"cs-on":"cs-off"}`}/>
+                <span style={{color:ezproxyUrl?"var(--teal-500)":"rgba(255,255,255,.35)",fontSize:11,whiteSpace:"nowrap"}}>{ezproxyUrl?`Proxy: ${(ezproxyUrl.split("/")[2]||"").slice(0,28)}`:"No proxy"}</span>
+              </span>
+            </div>
+            <button className="conn-save" onClick={saveSettings}>Save</button>
+          </div>
 
           {/* Mode toggle */}
           <div className="mode-bar">
@@ -811,6 +868,26 @@ function App() {
                   {s.label}<span className="pn">{loading[s.key]?"…":s.count}</span>
                 </button>
               ))}
+            </div>
+
+            {/* Paywall database strip */}
+            <div className="pw-strip">
+              <div className="pw-strip-hd">
+                <span className="pw-strip-lbl">🗝 Paywall databases — search with same keywords</span>
+                <span className="pw-strip-note">{ezproxyUrl?"Links route through your institutional proxy — paywalled papers will open directly":"Set your EZproxy URL above to open these through institutional access"}</span>
+              </div>
+              <div className="pw-dbs">
+                {PAYWALL_DBS.map(db=>{
+                  const rawUrl = db.getUrl(effectiveQuery||kw);
+                  const href = ezproxyUrl ? proxyLink(rawUrl) : rawUrl;
+                  return (
+                    <a key={db.name} className="pw-db-btn" href={href} target="_blank" rel="noreferrer"
+                       style={{borderColor:db.color,color:db.color,background:db.bg}}>
+                      {db.name} ↗
+                    </a>
+                  );
+                })}
+              </div>
             </div>
 
             {Object.entries(errors).map(([k,m])=><div key={k} className="errbar">⚠ {SRC_META[k]?.label}: {m}</div>)}
