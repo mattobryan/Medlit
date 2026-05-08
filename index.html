@@ -3,338 +3,304 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MedLit Search — Clinical Evidence Platform</title>
-  <meta name="description" content="Intelligent clinical literature search across 6 free databases with AI synthesis, open-access detection, and institutional proxy support." />
+  <title>MedLit — Clinical Literature Search</title>
   <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,500;0,600;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <style>
-    *{box-sizing:border-box;margin:0;padding:0;}
-    :root{
-      --white:#ffffff;
-      --surface:#f3f5fb;
-      --surface-2:#e8ecf6;
-
-      --navy-50:#eef2fc;--navy-100:#d5dffa;--navy-200:#aabff5;
-      --navy-500:#2d52b8;--navy-600:#1e3f9e;--navy-700:#152f84;
-      --navy-800:#0e2068;--navy-900:#0a1645;
-
-      --teal-50:#f0fdfa;--teal-100:#ccfbf1;--teal-500:#14b8a6;--teal-600:#0d9488;--teal-700:#0f766e;
-
-      --gold-50:#fffbeb;--gold-100:#fef3c7;--gold-400:#fbbf24;--gold-500:#f59e0b;--gold-600:#d97706;
-
-      --purple-50:#f5f3ff;--purple-100:#ede9fe;--purple-600:#7c3aed;--purple-700:#6d28d9;
-
-      --green-50:#f0fdf4;--green-100:#dcfce7;--green-500:#22c55e;--green-600:#16a34a;
-      --rose-50:#fff1f2;--rose-500:#f43f5e;
-
-      --tx1:#0a1645;--tx2:#2d3f72;--tx3:#5a6b9a;--tx4:#8e9fc8;
-
-      --bd:#cdd6ee;--bd2:#e4eaf7;
-
-      --sh0:0 1px 2px rgba(10,22,69,.06);
-      --sh1:0 2px 6px rgba(10,22,69,.09);
-      --sh2:0 6px 18px rgba(10,22,69,.12);
-      --sh3:0 12px 36px rgba(10,22,69,.15);
-
-      --r:10px;--rsm:6px;--rlg:14px;--rxl:18px;
-      --fd:'Lora',Georgia,serif;
-      --fb:'Inter',system-ui,sans-serif;
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --bd: #e2e8f0;
+      --bd2: #f1f5f9;
+      --t1: #0f172a;
+      --t2: #475569;
+      --t3: #94a3b8;
+      --blue: #2563eb;
+      --blue-l: #eff6ff;
+      --blue-b: #bfdbfe;
+      --teal: #0d9488;
+      --teal-l: #f0fdfa;
+      --teal-b: #99f6e4;
+      --green: #16a34a;
+      --green-l: #f0fdf4;
+      --amber: #d97706;
+      --amber-l: #fffbeb;
+      --purple: #7c3aed;
+      --purple-l: #f5f3ff;
+      --red-l: #fff1f2;
+      --red: #f43f5e;
+      --hdr: #0f172a;
+      --r: 12px; --rs: 8px; --rxl: 16px;
+      --sh: 0 1px 3px rgba(15,23,42,.08), 0 1px 2px rgba(15,23,42,.04);
+      --sh2: 0 4px 16px rgba(15,23,42,.1);
+      --sh3: 0 12px 40px rgba(15,23,42,.15);
+      --ff: 'Inter', system-ui, sans-serif;
+      --fd: 'Lora', Georgia, serif;
     }
-    html{scroll-behavior:smooth;}
-    body{background:var(--surface);font-family:var(--fb);color:var(--tx1);}
-    #root{min-height:100vh;}
-    .app{min-height:100vh;padding-bottom:80px;}
+    html { scroll-behavior: smooth; }
+    body { background: var(--bg); font-family: var(--ff); color: var(--t1); }
+    #root { min-height: 100vh; }
 
-    /* ── Header ── */
-    .hdr{background:var(--navy-900);position:sticky;top:0;z-index:100;padding:14px 24px 18px;box-shadow:0 4px 20px rgba(10,22,69,.4);}
-    .hdr-inner{max-width:980px;margin:0 auto;}
-    .brand{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
-    .brand-mark{width:40px;height:40px;background:linear-gradient(135deg,var(--teal-600),var(--navy-500));border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;box-shadow:0 2px 12px rgba(13,148,136,.4);}
-    .brand-name{font-family:var(--fd);font-size:19px;font-weight:700;color:var(--white);letter-spacing:-.01em;}
-    .brand-sub{font-size:11px;color:rgba(255,255,255,.55);font-weight:400;margin-top:2px;}
-    .brand-btns{margin-left:auto;display:flex;gap:6px;}
-    .hbtn{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);border-radius:8px;padding:6px 12px;cursor:pointer;font-size:12px;color:rgba(255,255,255,.85);font-family:var(--fb);font-weight:500;display:flex;align-items:center;gap:5px;transition:all .15s;}
-    .hbtn:hover{background:rgba(255,255,255,.18);color:white;}
-    .hbtn.on{background:var(--teal-600);border-color:var(--teal-500);color:white;}
+    /* ── HEADER ── */
+    .hdr { background: var(--hdr); padding: 0 24px; height: 52px; display: flex; align-items: center; position: sticky; top: 0; z-index: 100; }
+    .hdr-inner { max-width: 780px; margin: 0 auto; width: 100%; display: flex; align-items: center; gap: 12px; }
+    .logo { display: flex; align-items: center; gap: 8px; text-decoration: none; }
+    .logo-mark { width: 28px; height: 28px; background: linear-gradient(135deg, var(--teal), var(--blue)); border-radius: 7px; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+    .logo-name { font-family: var(--fd); font-size: 16px; font-weight: 600; color: #fff; letter-spacing: -.01em; }
+    .hdr-gap { flex: 1; }
+    .hdr-btns { display: flex; align-items: center; gap: 6px; }
+    .hbtn { height: 30px; padding: 0 12px; border-radius: 20px; border: 1px solid rgba(255,255,255,.15); background: transparent; color: rgba(255,255,255,.65); font-family: var(--ff); font-size: 12px; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 5px; transition: all .15s; white-space: nowrap; }
+    .hbtn:hover { background: rgba(255,255,255,.1); color: #fff; }
+    .hbtn.on { background: var(--teal); border-color: var(--teal); color: #fff; }
+    .hbtn-icon { width: 30px; padding: 0; justify-content: center; font-size: 14px; }
 
-    /* Mode toggle */
-    .mode-bar{display:flex;align-items:center;gap:6px;margin-bottom:10px;}
-    .mode-lbl{font-size:11px;color:rgba(255,255,255,.5);font-weight:600;text-transform:uppercase;letter-spacing:.07em;margin-right:2px;}
-    .mbtn{padding:5px 13px;border-radius:20px;font-size:12px;font-weight:600;border:1.5px solid rgba(255,255,255,.2);background:transparent;color:rgba(255,255,255,.65);cursor:pointer;font-family:var(--fb);transition:all .15s;}
-    .mbtn.active{background:var(--teal-600);border-color:var(--teal-500);color:white;}
-    .mbtn:not(.active):hover{border-color:rgba(255,255,255,.4);color:white;}
-
-    /* Search row */
-    .srow{display:flex;gap:8px;align-items:center;}
-    .swrap{flex:1;position:relative;}
-    .sico{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:rgba(255,255,255,.4);font-size:15px;pointer-events:none;}
-    .sinput{width:100%;padding:11px 14px 11px 38px;background:rgba(255,255,255,.1);border:1.5px solid rgba(255,255,255,.18);border-radius:var(--r);font-family:var(--fb);font-size:14px;color:white;outline:none;transition:all .15s;}
-    .sinput::placeholder{color:rgba(255,255,255,.38);}
-    .sinput:focus{background:rgba(255,255,255,.16);border-color:var(--teal-500);box-shadow:0 0 0 3px rgba(20,184,166,.2);}
-    .sbtn{background:var(--teal-600);color:white;border:none;border-radius:var(--r);padding:11px 22px;font-family:var(--fb);font-size:14px;font-weight:700;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:6px;white-space:nowrap;box-shadow:0 2px 10px rgba(13,148,136,.4);}
-    .sbtn:hover{background:var(--teal-700);transform:translateY(-1px);box-shadow:0 4px 16px rgba(13,148,136,.45);}
-    .sbtn:active{transform:translateY(0);}
-    .sbtn:disabled{background:rgba(255,255,255,.15);box-shadow:none;cursor:not-allowed;transform:none;color:rgba(255,255,255,.4);}
-
-    /* Smart search badge */
-    .smart-badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;color:var(--gold-400);font-weight:600;background:rgba(251,191,36,.12);border:1px solid rgba(251,191,36,.3);border-radius:20px;padding:3px 10px;margin-left:8px;}
-
-    /* Enhanced query preview */
-    .eq-preview{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:var(--rsm);padding:8px 12px;margin-top:6px;font-size:11.5px;color:rgba(255,255,255,.7);font-family:monospace;word-break:break-all;line-height:1.6;}
-    .eq-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--teal-500);margin-bottom:3px;font-family:var(--fb);}
+    /* ── SEARCH HERO ── */
+    .hero { background: #fff; border-bottom: 1px solid var(--bd); padding: 28px 24px 20px; }
+    .hero-inner { max-width: 780px; margin: 0 auto; }
+    .search-wrap { display: flex; gap: 8px; align-items: center; }
+    .search-box { flex: 1; position: relative; }
+    .search-ico { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--t3); pointer-events: none; font-size: 16px; }
+    .search-inp { width: 100%; height: 48px; padding: 0 16px 0 44px; border: 2px solid var(--bd); border-radius: var(--r); font-family: var(--ff); font-size: 15px; color: var(--t1); background: var(--bg); outline: none; transition: all .15s; }
+    .search-inp:focus { border-color: var(--teal); background: #fff; box-shadow: 0 0 0 3px rgba(13,148,136,.12); }
+    .search-inp::placeholder { color: var(--t3); }
+    .search-btn { height: 48px; padding: 0 24px; background: var(--teal); color: #fff; border: none; border-radius: var(--r); font-family: var(--ff); font-size: 14px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all .15s; white-space: nowrap; box-shadow: 0 2px 8px rgba(13,148,136,.3); flex-shrink: 0; }
+    .search-btn:hover { background: #0b7a70; transform: translateY(-1px); box-shadow: 0 4px 14px rgba(13,148,136,.4); }
+    .search-btn:active { transform: none; }
+    .search-btn:disabled { background: var(--t3); box-shadow: none; cursor: not-allowed; transform: none; }
+    .search-sub { display: flex; align-items: center; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
+    .mode-pill { height: 26px; padding: 0 12px; border-radius: 20px; border: 1.5px solid var(--bd); background: #fff; color: var(--t2); font-family: var(--ff); font-size: 12px; font-weight: 500; cursor: pointer; transition: all .15s; }
+    .mode-pill.active { background: var(--t1); border-color: var(--t1); color: #fff; }
+    .mode-pill:not(.active):hover { border-color: var(--t2); color: var(--t1); }
+    .sub-sep { color: var(--bd); font-size: 14px; }
+    .smart-pill { height: 26px; padding: 0 12px; border-radius: 20px; border: 1.5px solid var(--bd); background: #fff; color: var(--t2); font-family: var(--ff); font-size: 12px; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 5px; transition: all .15s; }
+    .smart-pill.active { background: var(--amber-l); border-color: var(--amber); color: var(--amber); }
+    .smart-pill:not(.active):hover { border-color: var(--t2); color: var(--t1); }
+    .eq-pill { height: 26px; padding: 0 12px; border-radius: 20px; border: 1.5px solid var(--bd); background: #fff; color: var(--t3); font-family: var(--ff); font-size: 12px; cursor: pointer; transition: all .15s; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .eq-pill:hover { border-color: var(--t3); color: var(--t2); }
 
     /* PICO */
-    .pico-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;}
-    .pf{display:flex;flex-direction:column;gap:4px;}
-    .plbl{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:700;color:rgba(255,255,255,.65);text-transform:uppercase;letter-spacing:.06em;}
-    .pdot{width:20px;height:20px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:white;flex-shrink:0;}
-    .pd-p{background:var(--navy-500);}.pd-i{background:var(--teal-600);}.pd-c{background:var(--gold-600);}.pd-o{background:var(--purple-600);}
-    .pinp{padding:8px 12px;background:rgba(255,255,255,.1);border:1.5px solid rgba(255,255,255,.16);border-radius:var(--rsm);font-family:var(--fb);font-size:13px;color:white;outline:none;transition:all .15s;width:100%;}
-    .pinp::placeholder{color:rgba(255,255,255,.35);}
-    .pinp:focus{border-color:var(--teal-500);background:rgba(255,255,255,.15);}
+    .pico-wrap { margin-top: 12px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .pf { display: flex; flex-direction: column; gap: 4px; }
+    .pf-label { font-size: 11px; font-weight: 700; color: var(--t2); text-transform: uppercase; letter-spacing: .06em; display: flex; align-items: center; gap: 5px; }
+    .pf-dot { width: 18px; height: 18px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 800; color: #fff; flex-shrink: 0; }
+    .pd-p { background: var(--blue); } .pd-i { background: var(--teal); } .pd-c { background: var(--amber); } .pd-o { background: var(--purple); }
+    .pf-inp { height: 36px; padding: 0 12px; border: 1.5px solid var(--bd); border-radius: var(--rs); font-family: var(--ff); font-size: 13px; color: var(--t1); background: var(--bg); outline: none; transition: border-color .15s; }
+    .pf-inp:focus { border-color: var(--teal); background: #fff; }
+    .pf-inp::placeholder { color: var(--t3); }
+    .pico-preview { margin-top: 8px; padding: 8px 12px; background: var(--blue-l); border: 1px solid var(--blue-b); border-radius: var(--rs); font-size: 12px; color: var(--blue); font-family: monospace; word-break: break-all; line-height: 1.6; }
 
-    /* Settings panel */
-    .settings-panel{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);border-radius:var(--r);padding:16px;margin-bottom:10px;animation:fdUp .2s ease both;}
-    .sp-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
-    .sp-field{display:flex;flex-direction:column;gap:5px;}
-    .sp-label{font-size:11px;font-weight:700;color:rgba(255,255,255,.55);text-transform:uppercase;letter-spacing:.06em;}
-    .sp-input{padding:7px 12px;background:rgba(255,255,255,.1);border:1.5px solid rgba(255,255,255,.18);border-radius:var(--rsm);font-family:var(--fb);font-size:13px;color:white;outline:none;transition:all .15s;}
-    .sp-input::placeholder{color:rgba(255,255,255,.3);}
-    .sp-input:focus{border-color:var(--teal-500);}
-    .sp-hint{font-size:11px;color:rgba(255,255,255,.38);line-height:1.5;margin-top:3px;}
-    .sp-save{padding:7px 16px;background:var(--teal-600);color:white;border:none;border-radius:var(--rsm);font-family:var(--fb);font-size:12px;font-weight:700;cursor:pointer;transition:background .15s;margin-top:8px;}
-    .sp-save:hover{background:var(--teal-700);}
-    .sp-proxy-active{font-size:11px;color:var(--teal-500);display:flex;align-items:center;gap:5px;margin-top:4px;font-weight:500;}
+    /* Enhanced query */
+    .eq-banner { margin-top: 8px; padding: 7px 12px; background: var(--amber-l); border: 1px solid #fde68a; border-radius: var(--rs); font-size: 12px; color: var(--amber); display: flex; align-items: flex-start; gap: 6px; }
+    .eq-banner b { white-space: nowrap; }
 
-    /* Adv filters */
-    .adv-bar{display:flex;align-items:center;gap:8px;margin-top:8px;flex-wrap:wrap;}
-    .adbtn{display:flex;align-items:center;gap:5px;padding:5px 11px;border:1.5px solid rgba(255,255,255,.18);border-radius:var(--rsm);font-family:var(--fb);font-size:12px;color:rgba(255,255,255,.65);background:transparent;cursor:pointer;font-weight:500;transition:all .15s;}
-    .adbtn:hover{border-color:rgba(255,255,255,.35);color:white;}
-    .adbtn.on{background:rgba(20,184,166,.2);border-color:var(--teal-500);color:var(--teal-500);}
-    .adn{background:var(--teal-600);color:white;border-radius:10px;padding:1px 6px;font-size:10px;font-weight:700;}
-    .adv-panel{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:var(--r);padding:14px 16px;margin-top:6px;display:flex;flex-wrap:wrap;gap:20px;align-items:flex-end;animation:fdUp .2s ease both;}
-    .fg{display:flex;flex-direction:column;gap:5px;}
-    .flbl{font-size:11px;font-weight:700;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.06em;}
-    .yrrow{display:flex;align-items:center;gap:6px;}
-    .yrinp{width:72px;padding:6px 8px;border:1.5px solid rgba(255,255,255,.18);border-radius:var(--rsm);font-family:var(--fb);font-size:13px;color:white;background:rgba(255,255,255,.1);outline:none;}
-    .yrinp:focus{border-color:var(--teal-500);}
-    .yrsep{font-size:12px;color:rgba(255,255,255,.4);}
-    .chkrow{display:flex;align-items:center;gap:7px;cursor:pointer;user-select:none;}
-    .chkrow input{width:16px;height:16px;accent-color:var(--teal-500);cursor:pointer;}
-    .chklbl{font-size:13px;color:rgba(255,255,255,.75);font-weight:400;}
+    /* ── SETTINGS MODAL ── */
+    .modal-bg { position: fixed; inset: 0; background: rgba(15,23,42,.4); z-index: 200; display: flex; align-items: flex-start; justify-content: flex-end; padding: 60px 24px 0 0; }
+    .modal { background: #fff; border-radius: var(--rxl); padding: 24px; width: 380px; box-shadow: var(--sh3); animation: popIn .15s ease both; }
+    @keyframes popIn { from { opacity:0; transform: translateY(-8px) scale(.97); } to { opacity:1; transform: none; } }
+    .modal-hd { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+    .modal-title { font-size: 15px; font-weight: 700; color: var(--t1); }
+    .modal-close { background: none; border: none; cursor: pointer; font-size: 18px; color: var(--t3); line-height: 1; padding: 2px; }
+    .modal-close:hover { color: var(--t1); }
+    .mf { display: flex; flex-direction: column; gap: 5px; margin-bottom: 14px; }
+    .mf-label { font-size: 11px; font-weight: 700; color: var(--t2); text-transform: uppercase; letter-spacing: .06em; }
+    .mf-input { height: 38px; padding: 0 12px; border: 1.5px solid var(--bd); border-radius: var(--rs); font-family: var(--ff); font-size: 13px; color: var(--t1); outline: none; transition: border-color .15s; }
+    .mf-input:focus { border-color: var(--teal); }
+    .mf-hint { font-size: 11px; color: var(--t3); line-height: 1.5; }
+    .mf-status { font-size: 11px; font-weight: 600; color: var(--teal); display: flex; align-items: center; gap: 4px; margin-top: 3px; }
+    .modal-save { width: 100%; height: 40px; background: var(--teal); color: #fff; border: none; border-radius: var(--rs); font-family: var(--ff); font-size: 14px; font-weight: 700; cursor: pointer; transition: background .15s; margin-top: 4px; }
+    .modal-save:hover { background: #0b7a70; }
 
-    /* History */
-    .hist-bar{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:8px;}
-    .hlbl{font-size:11px;color:rgba(255,255,255,.4);font-weight:600;text-transform:uppercase;letter-spacing:.06em;white-space:nowrap;}
-    .hpill{font-size:11px;padding:3px 10px;border-radius:20px;background:rgba(255,255,255,.08);color:rgba(255,255,255,.65);cursor:pointer;border:1px solid rgba(255,255,255,.14);font-weight:400;transition:all .15s;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:var(--fb);}
-    .hpill:hover{background:rgba(20,184,166,.2);color:var(--teal-500);border-color:var(--teal-600);}
+    /* ── MAIN ── */
+    .main { max-width: 780px; margin: 0 auto; padding: 20px 24px 80px; }
 
-    /* Spinner */
-    .spin{width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:white;border-radius:50%;animation:rot .7s linear infinite;}
-    .mspin{width:13px;height:13px;border:2px solid var(--bd);border-top-color:var(--navy-600);border-radius:50%;animation:rot .7s linear infinite;flex-shrink:0;}
-    @keyframes rot{to{transform:rotate(360deg);}}
-    @keyframes fdUp{from{opacity:0;transform:translateY(-6px);}to{opacity:1;transform:translateY(0);}}
-    @keyframes cIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
-
-    /* Main */
-    .main{max-width:980px;margin:0 auto;padding:24px;}
-
-    /* Source pills */
-    .src-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:20px;align-items:center;}
-    .src-lbl{font-size:11px;color:var(--tx3);font-weight:700;text-transform:uppercase;letter-spacing:.07em;margin-right:2px;}
-    .spill{padding:5px 13px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;border:1.5px solid var(--bd);background:var(--white);color:var(--tx2);transition:all .15s;display:flex;align-items:center;gap:5px;}
-    .spill:hover{border-color:var(--navy-400);color:var(--navy-700);}
-    .spill.active{background:var(--navy-800);border-color:var(--navy-800);color:white;}
-    .pn{background:rgba(255,255,255,.22);border-radius:10px;padding:1px 6px;font-size:11px;}
-    .spill:not(.active) .pn{background:var(--surface-2);color:var(--tx3);}
-
-    /* AI Panel */
-    .ai-panel{background:linear-gradient(135deg,var(--navy-900) 0%,#102a5a 100%);border:1px solid var(--navy-700);border-radius:var(--rxl);padding:22px 24px;margin-bottom:24px;animation:fdUp .4s ease both;}
-    .ai-top{display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap;}
-    .ai-badge{display:flex;align-items:center;gap:6px;background:var(--purple-600);color:white;border-radius:20px;padding:4px 12px;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;}
-    .ai-dot{width:7px;height:7px;background:white;border-radius:50%;animation:pulse 1.5s ease-in-out infinite;flex-shrink:0;}
-    @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.35;}}
-    .ai-ev{display:inline-flex;align-items:center;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;text-transform:uppercase;letter-spacing:.05em;}
-    .ev-high{background:rgba(34,197,94,.15);color:#4ade80;border:1px solid rgba(34,197,94,.3);}
-    .ev-moderate{background:rgba(251,191,36,.15);color:var(--gold-400);border:1px solid rgba(251,191,36,.3);}
-    .ev-low{background:rgba(244,63,94,.15);color:#fb7185;border:1px solid rgba(244,63,94,.3);}
-    .ev-mixed{background:rgba(99,102,241,.15);color:#a5b4fc;border:1px solid rgba(99,102,241,.3);}
-    .ai-dismiss{margin-left:auto;background:none;border:none;cursor:pointer;font-size:16px;color:rgba(255,255,255,.4);transition:color .15s;line-height:1;}
-    .ai-dismiss:hover{color:rgba(255,255,255,.8);}
-    .ai-slbl{font-size:10px;font-weight:700;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;}
-    .ai-overview{font-family:var(--fd);font-size:15px;color:rgba(255,255,255,.9);line-height:1.85;margin-bottom:16px;font-style:italic;}
-    .ai-tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;}
-    .ai-tag{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:20px;padding:4px 12px;font-size:12px;color:rgba(255,255,255,.8);font-weight:500;}
-    .ai-types{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:14px;}
-    .ai-chip{font-size:11px;padding:3px 10px;border-radius:20px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.7);font-weight:500;}
-    .ai-clinical{padding:12px 16px;background:rgba(22,163,74,.1);border-radius:var(--rsm);border-left:3px solid var(--green-500);margin-bottom:14px;}
-    .ai-clbl{font-size:10px;font-weight:700;color:#4ade80;text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px;}
-    .ai-ctxt{font-size:13px;color:rgba(255,255,255,.8);line-height:1.65;}
-    .ai-gaps-wrap{padding:12px 16px;background:rgba(13,148,136,.1);border-radius:var(--rsm);border-left:3px solid var(--teal-500);margin-bottom:14px;}
-    .ai-glbl{font-size:10px;font-weight:700;color:var(--teal-500);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px;}
-    .ai-gtxt{font-size:13px;color:rgba(255,255,255,.75);line-height:1.65;}
-    .ai-suglbl{font-size:10px;font-weight:700;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.06em;margin-bottom:7px;}
-    .ai-sugwrap{display:flex;flex-wrap:wrap;gap:5px;}
-    .ai-sug{font-size:12px;padding:4px 11px;border-radius:20px;border:1.5px solid rgba(20,184,166,.4);background:rgba(20,184,166,.08);color:var(--teal-500);cursor:pointer;font-weight:600;transition:all .15s;font-family:var(--fb);}
-    .ai-sug:hover{background:var(--teal-600);color:white;border-color:var(--teal-600);}
-    .ai-loading{display:flex;align-items:center;gap:10px;font-size:13px;color:rgba(255,255,255,.65);font-weight:500;}
-    .ai-nokey{font-size:13px;color:rgba(255,255,255,.55);line-height:1.65;}
-
-    /* Study badges */
-    .stbadge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;text-transform:uppercase;letter-spacing:.04em;flex-shrink:0;}
-    .st-sr{background:#f3e8ff;color:#7e22ce;}
-    .st-rct{background:#dcfce7;color:#15803d;}
-    .st-cohort{background:#fef3c7;color:#92400e;}
-    .st-qual{background:#fce7f3;color:#9d174d;}
-    .st-cross{background:#dbeafe;color:#1d4ed8;}
-    .st-review{background:#ccfbf1;color:#0f766e;}
-    .st-case{background:#fef9c3;color:#854d0e;}
-
-    /* Toolbar */
-    .toolbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px;}
-    .res-count{font-size:13px;font-weight:600;color:var(--tx2);}
-    .tbr{display:flex;align-items:center;gap:8px;}
-    .sortsel{padding:5px 10px;border:1.5px solid var(--bd);border-radius:var(--rsm);font-family:var(--fb);font-size:12px;color:var(--tx2);background:var(--white);outline:none;cursor:pointer;font-weight:500;}
-
-    /* Export */
-    .expwrap{position:relative;}
-    .expbtn{padding:5px 12px;border:1.5px solid var(--bd);border-radius:var(--rsm);font-family:var(--fb);font-size:12px;color:var(--tx2);background:var(--white);cursor:pointer;transition:all .15s;font-weight:600;display:flex;align-items:center;gap:5px;}
-    .expbtn:hover{border-color:var(--navy-400);color:var(--navy-700);background:var(--navy-50);}
-    .expmenu{position:absolute;right:0;top:calc(100% + 4px);background:white;border:1.5px solid var(--bd);border-radius:var(--rsm);box-shadow:var(--sh2);z-index:200;min-width:175px;overflow:hidden;animation:fdUp .15s ease both;}
-    .expitem{display:block;width:100%;padding:9px 14px;font-size:13px;color:var(--tx1);cursor:pointer;transition:background .1s;font-weight:500;border:none;background:none;text-align:left;font-family:var(--fb);}
-    .expitem:hover{background:var(--surface);color:var(--navy-700);}
-    .expitem+.expitem{border-top:1px solid var(--bd2);}
-
-    /* Bookmark */
-    .bkbtn{background:none;border:none;cursor:pointer;font-size:15px;line-height:1;padding:3px 5px;border-radius:4px;opacity:.35;transition:opacity .15s;}
-    .bkbtn:hover{opacity:.7;}.bkbtn.saved{opacity:1;}
-    .bkbar{background:var(--gold-50);border:1.5px solid var(--gold-400);border-radius:var(--r);padding:10px 16px;margin-bottom:14px;display:flex;align-items:center;gap:10px;}
-    .bkct{font-size:13px;font-weight:700;color:var(--gold-600);}
-    .bkview{font-size:12px;font-weight:700;color:var(--navy-700);background:none;border:none;cursor:pointer;font-family:var(--fb);text-decoration:underline;}
-    .bkclr{font-size:12px;color:var(--tx4);background:none;border:none;cursor:pointer;font-family:var(--fb);margin-left:auto;}
-
-    /* Result cards */
-    .rcard{background:var(--white);border:1.5px solid var(--bd);border-radius:var(--r);padding:20px 22px;margin-bottom:10px;transition:all .15s;box-shadow:var(--sh0);animation:cIn .22s ease both;}
-    .rcard:hover{border-color:var(--navy-200);box-shadow:var(--sh1);transform:translateX(2px);}
-    .card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:8px;}
-    .ctitle{font-family:var(--fd);font-size:15.5px;font-weight:600;color:var(--tx1);line-height:1.55;flex:1;}
-    .ctitle a{color:inherit;text-decoration:none;}
-    .ctitle a:hover{color:var(--navy-700);text-decoration:underline;text-decoration-color:var(--navy-200);}
-    .cbadges{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;}
-    .srcbadge{font-size:10px;font-weight:700;padding:3px 8px;border-radius:4px;letter-spacing:.04em;text-transform:uppercase;}
-    .b-pubmed{background:#dbeafe;color:#1d4ed8;}
-    .b-europepmc{background:#dcfce7;color:#15803d;}
-    .b-semanticscholar{background:#fef3c7;color:#92400e;}
-    .b-openalex{background:#f3e8ff;color:#7e22ce;}
-    .b-crossref{background:#fce7f3;color:#9d174d;}
-    .b-doaj{background:#ccfbf1;color:#0f766e;}
-    .cmeta{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--tx3);margin-bottom:10px;flex-wrap:wrap;}
-    .myr{font-weight:700;color:var(--tx2);}
-    .msep{color:var(--bd);}
-    .mjnl{font-style:italic;}
-    .mauth{color:var(--tx4);}
-    .mcite{font-size:11px;color:var(--tx4);}
-    .cabstract{font-size:13.5px;color:var(--tx2);line-height:1.8;margin-bottom:4px;padding:12px 16px;background:var(--surface);border-radius:var(--rsm);border-left:3px solid var(--navy-200);}
-    .abs-more{background:none;border:none;cursor:pointer;font-size:11px;color:var(--navy-600);font-family:var(--fb);font-weight:700;padding:3px 0 0;display:block;transition:color .15s;}
-    .abs-more:hover{color:var(--navy-800);}
-    .cfooter{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding-top:12px;border-top:1px solid var(--bd2);margin-top:12px;}
-    .lbtn{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:700;padding:5px 13px;border-radius:var(--rsm);text-decoration:none;transition:all .15s;border:1.5px solid transparent;cursor:pointer;font-family:var(--fb);}
-    .lb-pri{background:var(--navy-800);color:white;border-color:var(--navy-800);}
-    .lb-pri:hover{background:var(--navy-900);}
-    .lb-grn{background:var(--green-50);color:var(--green-600);border-color:#86efac;}
-    .lb-grn:hover{background:var(--green-100);}
-    .lb-amb{background:var(--gold-50);color:var(--gold-600);border-color:var(--gold-400);}
-    .lb-amb:hover{background:var(--gold-100);}
-    .lb-gray{background:var(--surface);color:var(--tx4);border-color:var(--bd);cursor:default!important;}
-    .oa-flag{font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;background:var(--green-50);color:var(--green-600);border:1px solid #86efac;text-transform:uppercase;letter-spacing:.05em;}
-    .proxy-flag{font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;background:var(--navy-50);color:var(--navy-700);border:1px solid var(--navy-200);text-transform:uppercase;letter-spacing:.05em;}
-
-    /* Loading */
-    .ldsrcs{display:flex;flex-direction:column;gap:8px;margin-bottom:16px;}
-    .ldsrc{display:flex;align-items:center;gap:10px;padding:11px 14px;background:var(--white);border-radius:var(--rsm);border:1.5px solid var(--bd);font-size:13px;color:var(--tx3);font-weight:500;box-shadow:var(--sh0);}
-    .ddot{width:14px;height:14px;background:var(--green-500);border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-size:9px;flex-shrink:0;}
-    .errbar{background:var(--rose-50);border:1.5px solid #fecdd3;border-radius:var(--rsm);padding:9px 14px;font-size:12px;color:var(--rose-500);margin-bottom:8px;font-weight:500;}
-
-    /* Empty state */
-    .empty{text-align:center;padding:80px 20px;background:var(--white);border-radius:var(--rxl);border:2px dashed var(--bd);}
-    .empty-ico{font-size:52px;margin-bottom:18px;}
-    .empty-title{font-family:var(--fd);font-size:22px;color:var(--tx1);margin-bottom:10px;}
-    .empty-desc{font-size:14px;color:var(--tx3);max-width:460px;margin:0 auto 24px;line-height:1.75;}
-    .db-chips{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;}
-    .db-chip{font-size:11px;padding:3px 10px;border-radius:20px;font-weight:600;background:var(--navy-50);color:var(--navy-700);border:1px solid var(--navy-100);}
-    .eq-chips{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;margin-top:16px;}
-    .eq-chip{font-size:12px;padding:5px 13px;border-radius:20px;background:white;border:1.5px solid var(--bd);color:var(--tx2);cursor:pointer;font-family:var(--fb);font-weight:400;transition:all .15s;}
-    .eq-chip:hover{border-color:var(--navy-400);color:var(--navy-700);background:var(--navy-50);}
-
-    /* Section */
-    .section{margin-top:44px;}
-    .sechd{display:flex;align-items:center;gap:10px;margin-bottom:5px;}
-    .secico{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;}
-    .sic-tl{background:var(--teal-100);}
-    .sectitle{font-family:var(--fd);font-size:19px;font-weight:600;color:var(--tx1);}
-    .secdesc{font-size:13px;color:var(--tx3);margin-bottom:18px;line-height:1.65;padding-left:40px;}
-
-    /* Connection bar */
-    .conn-bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:8px 0 12px;border-bottom:1px solid rgba(255,255,255,.1);margin-bottom:12px;}
-    .conn-field{display:flex;align-items:center;gap:6px;flex:1;min-width:180px;}
-    .conn-ico{font-size:13px;flex-shrink:0;}
-    .conn-input{flex:1;padding:6px 10px;background:rgba(255,255,255,.1);border:1.5px solid rgba(255,255,255,.16);border-radius:var(--rsm);font-family:var(--fb);font-size:12px;color:white;outline:none;transition:border-color .15s;}
-    .conn-input::placeholder{color:rgba(255,255,255,.3);}
-    .conn-input:focus{border-color:var(--teal-500);}
-    .conn-save{padding:6px 14px;background:var(--teal-600);color:white;border:none;border-radius:var(--rsm);font-family:var(--fb);font-size:12px;font-weight:700;cursor:pointer;transition:background .15s;white-space:nowrap;}
-    .conn-save:hover{background:var(--teal-700);}
-    .conn-status{display:flex;align-items:center;gap:5px;font-size:11px;font-weight:600;}
-    .cs-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
-    .cs-on{background:var(--teal-500);}
-    .cs-off{background:rgba(255,255,255,.25);}
+    /* Source tabs */
+    .tabs { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 12px; }
+    .tab { height: 30px; padding: 0 12px; border-radius: 20px; border: 1.5px solid var(--bd); background: #fff; color: var(--t2); font-family: var(--ff); font-size: 12px; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 5px; transition: all .15s; }
+    .tab:hover { border-color: var(--t2); color: var(--t1); }
+    .tab.active { background: var(--t1); border-color: var(--t1); color: #fff; }
+    .tab-n { font-size: 11px; opacity: .7; }
 
     /* Paywall strip */
-    .pw-strip{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:var(--r);padding:12px 16px;margin-bottom:16px;animation:fdUp .3s ease both;}
-    .pw-strip-hd{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
-    .pw-strip-lbl{font-size:12px;font-weight:700;color:var(--tx3);}
-    .pw-strip-note{font-size:11px;color:var(--tx4);}
-    .pw-dbs{display:flex;flex-wrap:wrap;gap:6px;}
-    .pw-db-btn{display:inline-flex;align-items:center;gap:4px;padding:5px 12px;border-radius:var(--rsm);font-size:12px;font-weight:700;text-decoration:none;border:1.5px solid;transition:all .15s;font-family:var(--fb);}
-    .pw-db-btn:hover{opacity:.85;transform:translateY(-1px);}
-    .pw-noproxy{font-size:12px;color:var(--tx4);font-style:italic;}
+    .pw-strip { margin-bottom: 16px; padding: 12px 16px; background: #fff; border: 1px solid var(--bd); border-radius: var(--r); }
+    .pw-strip-hd { font-size: 11px; font-weight: 700; color: var(--t3); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 8px; }
+    .pw-dbs { display: flex; flex-wrap: wrap; gap: 6px; }
+    .pw-btn { height: 28px; padding: 0 11px; border-radius: 20px; border: 1.5px solid; font-family: var(--ff); font-size: 12px; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; transition: opacity .15s; }
+    .pw-btn:hover { opacity: .75; }
+    .pw-note { font-size: 11px; color: var(--t3); margin-top: 6px; }
 
-    /* Workarounds grid */
-    .wkgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px;}
-    .wkcard{background:var(--white);border:1.5px solid var(--bd);border-radius:var(--r);padding:16px 18px;box-shadow:var(--sh0);transition:all .15s;}
-    .wkcard:hover{border-color:var(--navy-200);transform:translateY(-2px);box-shadow:var(--sh1);}
-    .wktop{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
-    .wkico{font-size:20px;}
-    .wkname{font-size:14px;font-weight:700;color:var(--tx1);}
-    .wktype{margin-left:auto;font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;letter-spacing:.04em;text-transform:uppercase;}
-    .t-free{background:var(--green-50);color:var(--green-600);border:1px solid #86efac;}
-    .t-legal{background:var(--navy-50);color:var(--navy-700);border:1px solid var(--navy-100);}
-    .t-tip{background:var(--gold-50);color:var(--gold-600);border:1px solid var(--gold-400);}
-    .wkdesc{font-size:13px;color:var(--tx2);line-height:1.65;margin-bottom:10px;}
-    .wklink{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:700;color:var(--navy-700);text-decoration:none;transition:color .15s;}
-    .wklink:hover{color:var(--navy-900);text-decoration:underline;}
+    /* Spinner */
+    .spin { width: 14px; height: 14px; border: 2px solid rgba(255,255,255,.3); border-top-color: #fff; border-radius: 50%; animation: rot .7s linear infinite; flex-shrink: 0; }
+    .mspin { width: 12px; height: 12px; border: 2px solid var(--bd); border-top-color: var(--teal); border-radius: 50%; animation: rot .7s linear infinite; flex-shrink: 0; }
+    @keyframes rot { to { transform: rotate(360deg); } }
+    @keyframes fadeUp { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:none; } }
+    @keyframes cardIn { from { opacity:0; transform:translateY(4px); } to { opacity:1; transform:none; } }
+
+    /* Loading list */
+    .ld-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
+    .ld-row { display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: #fff; border: 1px solid var(--bd); border-radius: var(--rs); font-size: 13px; color: var(--t2); }
+    .ld-done { width: 14px; height: 14px; background: var(--green); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 9px; flex-shrink: 0; }
+    .err-row { padding: 8px 12px; background: var(--red-l); border: 1px solid #fecdd3; border-radius: var(--rs); font-size: 12px; color: var(--red); margin-bottom: 6px; }
+
+    /* AI Panel */
+    .ai-panel { background: var(--purple-l); border: 1px solid #ddd6fe; border-left: 4px solid var(--purple); border-radius: var(--r); padding: 18px 20px; margin-bottom: 16px; animation: fadeUp .3s ease both; }
+    .ai-hd { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+    .ai-badge { display: flex; align-items: center; gap: 5px; background: var(--purple); color: #fff; border-radius: 20px; padding: 3px 10px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; }
+    .ai-dot { width: 6px; height: 6px; background: #fff; border-radius: 50%; animation: pulse 1.5s ease-in-out infinite; }
+    @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:.3;} }
+    .ai-ev { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; text-transform: uppercase; letter-spacing: .04em; }
+    .ev-high { background: var(--green-l); color: var(--green); }
+    .ev-moderate { background: var(--amber-l); color: var(--amber); }
+    .ev-low { background: var(--red-l); color: var(--red); }
+    .ev-mixed { background: var(--blue-l); color: var(--blue); }
+    .ai-dismiss { margin-left: auto; background: none; border: none; cursor: pointer; color: var(--t3); font-size: 16px; line-height: 1; }
+    .ai-dismiss:hover { color: var(--t1); }
+    .ai-overview { font-family: var(--fd); font-size: 14px; font-style: italic; color: var(--t1); line-height: 1.85; margin-bottom: 12px; }
+    .ai-slbl { font-size: 10px; font-weight: 700; color: var(--t3); text-transform: uppercase; letter-spacing: .07em; margin-bottom: 6px; }
+    .ai-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 12px; }
+    .ai-tag { font-size: 12px; padding: 3px 10px; border-radius: 20px; background: #fff; border: 1px solid #ddd6fe; color: var(--purple); font-weight: 500; }
+    .ai-types { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 12px; }
+    .ai-chip { font-size: 11px; padding: 2px 9px; border-radius: 20px; background: #fff; border: 1px solid var(--bd); color: var(--t2); }
+    .ai-box { padding: 10px 14px; border-radius: var(--rs); margin-bottom: 10px; }
+    .ai-box-green { background: var(--green-l); border-left: 3px solid var(--green); }
+    .ai-box-teal { background: var(--teal-l); border-left: 3px solid var(--teal); }
+    .ai-box-lbl { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; margin-bottom: 4px; }
+    .ai-box-green .ai-box-lbl { color: var(--green); }
+    .ai-box-teal .ai-box-lbl { color: var(--teal); }
+    .ai-box-txt { font-size: 13px; color: var(--t1); line-height: 1.65; }
+    .ai-sug-wrap { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 10px; }
+    .ai-sug { font-size: 12px; padding: 4px 11px; border-radius: 20px; border: 1.5px solid var(--teal-b); background: var(--teal-l); color: var(--teal); cursor: pointer; font-weight: 600; font-family: var(--ff); transition: all .15s; }
+    .ai-sug:hover { background: var(--teal); color: #fff; border-color: var(--teal); }
+    .ai-loading { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--t2); }
+    .ai-nokey { font-size: 13px; color: var(--t2); line-height: 1.6; }
+
+    /* Study badges */
+    .stbadge { font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 4px; text-transform: uppercase; letter-spacing: .04em; flex-shrink: 0; }
+    .st-sr { background: #f3e8ff; color: #7e22ce; }
+    .st-rct { background: #dcfce7; color: #15803d; }
+    .st-cohort { background: #fef3c7; color: #92400e; }
+    .st-qual { background: #fce7f3; color: #9d174d; }
+    .st-cross { background: #dbeafe; color: #1d4ed8; }
+    .st-review { background: #ccfbf1; color: #0f766e; }
+    .st-case { background: #fef9c3; color: #854d0e; }
+
+    /* Toolbar */
+    .toolbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; flex-wrap: wrap; gap: 8px; }
+    .res-count { font-size: 13px; color: var(--t2); font-weight: 500; }
+    .tbr { display: flex; align-items: center; gap: 6px; }
+    .sortsel { height: 30px; padding: 0 10px; border: 1.5px solid var(--bd); border-radius: var(--rs); font-family: var(--ff); font-size: 12px; color: var(--t2); background: #fff; outline: none; cursor: pointer; }
+    .expwrap { position: relative; }
+    .expbtn { height: 30px; padding: 0 12px; border: 1.5px solid var(--bd); border-radius: var(--rs); font-family: var(--ff); font-size: 12px; color: var(--t2); background: #fff; cursor: pointer; display: flex; align-items: center; gap: 4px; transition: all .15s; font-weight: 500; }
+    .expbtn:hover { border-color: var(--t2); color: var(--t1); }
+    .expmenu { position: absolute; right: 0; top: calc(100% + 4px); background: #fff; border: 1.5px solid var(--bd); border-radius: var(--rs); box-shadow: var(--sh2); z-index: 200; min-width: 170px; overflow: hidden; animation: fadeUp .12s ease both; }
+    .expitem { display: block; width: 100%; padding: 9px 14px; font-size: 13px; color: var(--t1); background: none; border: none; text-align: left; cursor: pointer; font-family: var(--ff); transition: background .1s; }
+    .expitem:hover { background: var(--bg); }
+    .expitem + .expitem { border-top: 1px solid var(--bd2); }
+
+    /* Result cards */
+    .rcard { background: #fff; border: 1px solid var(--bd); border-radius: var(--r); padding: 18px 20px; margin-bottom: 8px; animation: cardIn .2s ease both; transition: box-shadow .15s, border-color .15s; }
+    .rcard:hover { box-shadow: var(--sh); border-color: #cbd5e1; }
+    .card-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 6px; }
+    .ctitle { font-family: var(--fd); font-size: 15px; font-weight: 600; color: var(--t1); line-height: 1.5; flex: 1; }
+    .ctitle a { color: inherit; text-decoration: none; }
+    .ctitle a:hover { color: var(--teal); }
+    .cbadges { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; flex-shrink: 0; }
+    .srcbadge { font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 4px; text-transform: uppercase; letter-spacing: .04em; white-space: nowrap; }
+    .b-pubmed { background: #dbeafe; color: #1d4ed8; }
+    .b-europepmc { background: #dcfce7; color: #15803d; }
+    .b-semanticscholar { background: #fef3c7; color: #92400e; }
+    .b-openalex { background: #f3e8ff; color: #7e22ce; }
+    .b-crossref { background: #fce7f3; color: #9d174d; }
+    .b-doaj { background: #ccfbf1; color: #0f766e; }
+    .cmeta { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--t3); margin-bottom: 10px; flex-wrap: wrap; }
+    .myr { font-weight: 600; color: var(--t2); }
+    .msep { color: var(--bd); }
+    .mjnl { font-style: italic; }
+    .mcite { font-size: 11px; }
+    .cabstract { font-size: 13px; color: var(--t2); line-height: 1.75; padding: 10px 14px; background: var(--bg); border-radius: var(--rs); margin-bottom: 4px; }
+    .abs-more { background: none; border: none; cursor: pointer; font-size: 11px; color: var(--teal); font-family: var(--ff); font-weight: 600; padding: 2px 0; display: block; margin-bottom: 8px; }
+    .cfooter { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; padding-top: 10px; border-top: 1px solid var(--bd2); }
+    .lbtn { display: inline-flex; align-items: center; gap: 4px; height: 30px; padding: 0 12px; border-radius: var(--rs); font-size: 12px; font-weight: 600; text-decoration: none; border: 1.5px solid transparent; cursor: pointer; font-family: var(--ff); transition: all .15s; white-space: nowrap; }
+    .lb-pri { background: var(--t1); color: #fff; border-color: var(--t1); }
+    .lb-pri:hover { background: #1e293b; }
+    .lb-grn { background: var(--green-l); color: var(--green); border-color: #86efac; }
+    .lb-grn:hover { background: #dcfce7; }
+    .lb-amb { background: var(--amber-l); color: var(--amber); border-color: #fde68a; }
+    .lb-amb:hover { background: #fef3c7; }
+    .lb-gray { background: var(--bg); color: var(--t3); border-color: var(--bd); cursor: default; }
+    .oa-flag { font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 4px; background: var(--green-l); color: var(--green); border: 1px solid #86efac; text-transform: uppercase; }
+    .proxy-flag { font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 4px; background: var(--blue-l); color: var(--blue); border: 1px solid var(--blue-b); text-transform: uppercase; }
+    .bkbtn { background: none; border: none; cursor: pointer; font-size: 14px; line-height: 1; padding: 3px; opacity: .3; transition: opacity .15s; margin-left: auto; }
+    .bkbtn:hover { opacity: .7; }
+    .bkbtn.saved { opacity: 1; }
+
+    /* Bookmark bar */
+    .bk-bar { padding: 8px 14px; background: var(--amber-l); border: 1px solid #fde68a; border-radius: var(--rs); margin-bottom: 10px; display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--amber); font-weight: 600; }
+    .bk-view { background: none; border: none; cursor: pointer; font-size: 12px; color: var(--blue); font-family: var(--ff); font-weight: 600; text-decoration: underline; }
+    .bk-clr { background: none; border: none; cursor: pointer; font-size: 12px; color: var(--t3); font-family: var(--ff); margin-left: auto; }
+
+    /* Empty state */
+    .empty { text-align: center; padding: 60px 20px; }
+    .empty-ico { font-size: 48px; margin-bottom: 16px; }
+    .empty-title { font-family: var(--fd); font-size: 22px; color: var(--t1); margin-bottom: 8px; }
+    .empty-desc { font-size: 14px; color: var(--t2); max-width: 420px; margin: 0 auto 20px; line-height: 1.7; }
+    .db-chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 5px; margin-bottom: 20px; }
+    .db-chip { font-size: 11px; padding: 3px 10px; border-radius: 20px; background: var(--blue-l); color: var(--blue); border: 1px solid var(--blue-b); font-weight: 500; }
+    .ex-chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 5px; }
+    .ex-chip { font-size: 12px; padding: 5px 12px; border-radius: 20px; background: #fff; border: 1.5px solid var(--bd); color: var(--t2); cursor: pointer; font-family: var(--ff); transition: all .15s; }
+    .ex-chip:hover { border-color: var(--teal); color: var(--teal); }
+
+    /* Workarounds */
+    .section { margin-top: 40px; }
+    .sec-title { font-family: var(--fd); font-size: 17px; font-weight: 600; color: var(--t1); margin-bottom: 4px; }
+    .sec-desc { font-size: 13px; color: var(--t2); margin-bottom: 14px; line-height: 1.6; }
+    .wk-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 8px; }
+    .wk-card { background: #fff; border: 1px solid var(--bd); border-radius: var(--r); padding: 14px 16px; transition: box-shadow .15s; }
+    .wk-card:hover { box-shadow: var(--sh); }
+    .wk-top { display: flex; align-items: center; gap: 7px; margin-bottom: 6px; }
+    .wk-ico { font-size: 18px; }
+    .wk-name { font-size: 13px; font-weight: 700; color: var(--t1); }
+    .wk-type { margin-left: auto; font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 4px; text-transform: uppercase; }
+    .t-free { background: var(--green-l); color: var(--green); }
+    .t-legal { background: var(--blue-l); color: var(--blue); }
+    .t-tip { background: var(--amber-l); color: var(--amber); }
+    .wk-desc { font-size: 12px; color: var(--t2); line-height: 1.6; margin-bottom: 8px; }
+    .wk-link { font-size: 12px; font-weight: 600; color: var(--teal); text-decoration: none; }
+    .wk-link:hover { text-decoration: underline; }
+
+    /* Filters */
+    .filters-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+    .filt-btn { height: 26px; padding: 0 10px; border-radius: 20px; border: 1.5px solid var(--bd); background: #fff; color: var(--t3); font-size: 11px; font-weight: 500; cursor: pointer; font-family: var(--ff); transition: all .15s; }
+    .filt-btn:hover { border-color: var(--t2); color: var(--t2); }
+    .filt-btn.on { background: var(--blue-l); border-color: var(--blue-b); color: var(--blue); }
+    .filt-panel { background: #fff; border: 1px solid var(--bd); border-radius: var(--rs); padding: 12px 14px; margin-bottom: 12px; display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-end; animation: fadeUp .15s ease both; }
+    .fg { display: flex; flex-direction: column; gap: 4px; }
+    .fg-lbl { font-size: 11px; font-weight: 600; color: var(--t3); text-transform: uppercase; letter-spacing: .06em; }
+    .yr-row { display: flex; align-items: center; gap: 5px; }
+    .yr-inp { width: 66px; height: 30px; padding: 0 8px; border: 1.5px solid var(--bd); border-radius: var(--rs); font-family: var(--ff); font-size: 12px; color: var(--t1); background: #fff; outline: none; }
+    .yr-inp:focus { border-color: var(--teal); }
+    .chk { display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 13px; color: var(--t1); user-select: none; }
+    .chk input { width: 15px; height: 15px; accent-color: var(--teal); cursor: pointer; }
 
     /* Toast */
-    .toast{position:fixed;bottom:22px;right:22px;background:var(--navy-900);color:white;border-radius:var(--r);padding:13px 18px;font-size:13px;font-weight:500;z-index:9999;box-shadow:var(--sh3);animation:fdUp .2s ease;}
+    .toast { position: fixed; bottom: 20px; right: 20px; background: var(--t1); color: #fff; border-radius: var(--r); padding: 11px 16px; font-size: 13px; font-weight: 500; z-index: 999; box-shadow: var(--sh3); animation: fadeUp .15s ease; }
 
     /* Footer */
-    .footer{text-align:center;padding:48px 24px 20px;font-size:12px;color:var(--tx4);}
-    .footer a{color:var(--navy-600);text-decoration:none;}
-    .footer a:hover{text-decoration:underline;}
+    .footer { text-align: center; padding: 32px 24px 16px; font-size: 11px; color: var(--t3); }
 
-    @media(max-width:640px){
-      .hdr{padding:12px 14px 16px;}
-      .main{padding:14px;}
-      .sbtn{padding:11px 14px;font-size:13px;}
-      .card-top{flex-direction:column;gap:6px;}
-      .cbadges{flex-direction:row;flex-wrap:wrap;}
-      .wkgrid{grid-template-columns:1fr;}
-      .sp-grid{grid-template-columns:1fr;}
-      .pico-grid{grid-template-columns:1fr;}
-      .adv-panel{flex-direction:column;gap:12px;}
+    @media (max-width: 600px) {
+      .hdr { padding: 0 14px; }
+      .hero { padding: 18px 14px 14px; }
+      .main { padding: 14px 14px 60px; }
+      .card-top { flex-direction: column; gap: 6px; }
+      .cbadges { flex-direction: row; flex-wrap: wrap; }
+      .pico-wrap { grid-template-columns: 1fr; }
+      .modal { width: calc(100vw - 28px); }
+      .modal-bg { padding: 60px 14px 0 14px; }
     }
   </style>
 </head>
@@ -343,696 +309,506 @@
 <script type="text/babel">
 const { useState, useCallback, useRef, useEffect } = React;
 
-// ── Utilities ──────────────────────────────────────────────────────────────────
+// ── Utils ──────────────────────────────────────────────────────────────────────
+const clean = (s="") => s.replace(/<[^>]*>/g,"").replace(/&amp;/g,"&").replace(/&lt;/g,"<").replace(/&gt;/g,">").replace(/&quot;/g,'"').replace(/&#39;/g,"'").trim();
+const trunc = (s, n=1500) => s ? (s.trim().length>n ? s.trim().slice(0,n)+"…" : s.trim()) : null;
+const truncD = (s, n=280) => s && s.length>n ? s.slice(0,n)+"…" : s;
 
-const cleanHtml = (s = "") => s.replace(/<[^>]*>/g,"").replace(/&amp;/g,"&").replace(/&lt;/g,"<").replace(/&gt;/g,">").replace(/&quot;/g,'"').replace(/&#39;/g,"'").trim();
-
-const truncate = (s, n = 1500) => { if (!s) return null; s = s.trim(); return s.length > n ? s.slice(0,n)+"…" : s; };
-
-const truncDisp = (s, n = 280) => s && s.length > n ? s.slice(0,n)+"…" : s;
-
-function reconstructAbstract(inv) {
-  if (!inv || typeof inv !== "object") return null;
+function rebuildAbstract(inv) {
+  if(!inv||typeof inv!=="object") return null;
   try {
-    const all = Object.values(inv).flat();
-    if (!all.length) return null;
-    const max = Math.max(...all)+1;
-    const arr = new Array(max).fill("");
-    for (const [w,ps] of Object.entries(inv)) for (const p of ps) if (p<max) arr[p]=w;
+    const all=Object.values(inv).flat(); if(!all.length) return null;
+    const max=Math.max(...all)+1, arr=new Array(max).fill("");
+    for(const [w,ps] of Object.entries(inv)) for(const p of ps) if(p<max) arr[p]=w;
     return arr.join(" ").trim()||null;
   } catch { return null; }
 }
 
 function dedup(all) {
-  const seen = new Set();
-  return all.filter(r => {
-    const k = r.doi ? r.doi.toLowerCase() : r.title.toLowerCase().slice(0,60);
-    if (seen.has(k)) return false; seen.add(k); return true;
-  });
+  const seen=new Set();
+  return all.filter(r=>{ const k=r.doi?r.doi.toLowerCase():r.title.toLowerCase().slice(0,60); if(seen.has(k)) return false; seen.add(k); return true; });
 }
 
-function guessStudyType(title="", abstract="") {
-  const t = (title+" "+(abstract||"")).toLowerCase();
-  if (/systematic review|meta.analysis/.test(t)) return "Systematic Review";
-  if (/\brct\b|randomis|randomiz|placebo.controlled|double.blind/.test(t)) return "RCT";
-  if (/cohort study|prospective study|retrospective|longitudinal/.test(t)) return "Cohort";
-  if (/qualitative|thematic analysis|grounded theory|phenomenolog|focus group/.test(t)) return "Qualitative";
-  if (/\bsurvey\b|questionnaire|cross.sectional/.test(t)) return "Cross-Sectional";
-  if (/scoping review|narrative review|integrative review/.test(t)) return "Review";
-  if (/case report|case series/.test(t)) return "Case Report";
+function studyType(title="", abs="") {
+  const t=(title+" "+(abs||"")).toLowerCase();
+  if(/systematic review|meta.analysis/.test(t)) return "Systematic Review";
+  if(/\brct\b|randomis|randomiz|placebo.controlled|double.blind/.test(t)) return "RCT";
+  if(/cohort study|prospective study|retrospective|longitudinal/.test(t)) return "Cohort";
+  if(/qualitative|thematic analysis|phenomenolog|focus group/.test(t)) return "Qualitative";
+  if(/\bsurvey\b|questionnaire|cross.sectional/.test(t)) return "Cross-Sectional";
+  if(/scoping review|narrative review|integrative review/.test(t)) return "Review";
+  if(/case report|case series/.test(t)) return "Case Report";
   return null;
 }
 
-function buildPicoQuery(p,i,c,o) {
-  return [p,i,c,o].filter(s=>s&&s.trim()).map(s=>`(${s.trim()})`).join(" AND ");
-}
+function picoQ(p,i,c,o) { return [p,i,c,o].filter(s=>s&&s.trim()).map(s=>`(${s.trim()})`).join(" AND "); }
 
-function dlFile(content, filename, mime) {
-  const url = URL.createObjectURL(new Blob([content],{type:mime}));
-  Object.assign(document.createElement("a"),{href:url,download:filename}).click();
-  URL.revokeObjectURL(url);
-}
-
-function toBibTeX(rs) {
-  return rs.map((r,i)=>{
-    const doi = r.doi?r.doi.replace("https://doi.org/",""):"";
-    return `@article{ref${i+1}_${r.year||"nd"},\n  title   = {${r.title}},\n  author  = {${(r.authors||"Unknown").replace(/ et al\.?/," and others")}},\n  year    = {${r.year||"n.d."}},\n  journal = {${r.journal||""}},${doi?`\n  doi     = {${doi}},`:""}\n  url     = {${r.link||r.doi||""}}\n}`;
-  }).join("\n\n");
-}
-
-function toRIS(rs) {
-  return rs.map(r=>{
-    const doi = r.doi?r.doi.replace("https://doi.org/",""):"";
-    const lines = ["TY  - JOUR",`TI  - ${r.title}`];
-    (r.authors||"").split(",").forEach(a=>lines.push(`AU  - ${a.trim()}`));
-    if(r.year) lines.push(`PY  - ${r.year}`);
-    if(r.journal) lines.push(`JO  - ${r.journal}`);
-    if(doi) lines.push(`DO  - ${doi}`);
-    if(r.link||r.doi) lines.push(`UR  - ${r.link||r.doi}`);
-    if(r.abstract) lines.push(`AB  - ${r.abstract.slice(0,500)}`);
-    lines.push("ER  - "); return lines.join("\n");
-  }).join("\n\n");
-}
-
-function toCSV(rs) {
-  const e = s=>`"${(s||"").replace(/"/g,'""')}"`;
-  return ["Title,Authors,Year,Journal,DOI,Source,Open Access,Study Type",
-    ...rs.map(r=>[e(r.title),e(r.authors),r.year||"",e(r.journal),r.doi||r.link||"",r.source||"",r.isOA?"Yes":"No",r.studyType||""].join(","))
-  ].join("\n");
-}
-
-function scoreRelevance(r, query) {
-  const words = query.toLowerCase().split(/\s+/).filter(w=>w.length>3);
-  const ti = (r.title||"").toLowerCase();
-  const ab = (r.abstract||"").toLowerCase();
-  let s = 0;
-  words.forEach(w=>{ if(ti.includes(w)) s+=3; if(ab.includes(w)) s+=1; });
+function scoreR(r, q) {
+  const words=q.toLowerCase().split(/\s+/).filter(w=>w.length>3);
+  const ti=(r.title||"").toLowerCase(), ab=(r.abstract||"").toLowerCase();
+  let s=0; words.forEach(w=>{ if(ti.includes(w)) s+=3; if(ab.includes(w)) s+=1; });
   if(r.isOA||r.pdfUrl) s+=2;
-  if(r.citationCount>100) s+=3; else if(r.citationCount>10) s+=1;
-  const yr = parseInt(r.year)||0;
-  if(yr>=2020) s+=2; else if(yr>=2015) s+=1;
+  if((r.citationCount||0)>100) s+=3; else if((r.citationCount||0)>10) s+=1;
+  const yr=parseInt(r.year)||0; if(yr>=2020) s+=2; else if(yr>=2015) s+=1;
   return s;
 }
 
-// ── API Functions ──────────────────────────────────────────────────────────────
+function dlFile(content, name, type) {
+  const a=Object.assign(document.createElement("a"),{href:URL.createObjectURL(new Blob([content],{type})),download:name});
+  a.click(); URL.revokeObjectURL(a.href);
+}
 
+const toBibTeX = rs => rs.map((r,i)=>{
+  const doi=r.doi?r.doi.replace("https://doi.org/",""):"";
+  return `@article{ref${i+1}_${r.year||"nd"},\n  title   = {${r.title}},\n  author  = {${(r.authors||"Unknown").replace(/ et al\.?/," and others")}},\n  year    = {${r.year||"n.d."}},\n  journal = {${r.journal||""}},${doi?`\n  doi     = {${doi}},`:""}\n  url     = {${r.link||r.doi||""}}\n}`;
+}).join("\n\n");
+
+const toRIS = rs => rs.map(r=>{
+  const doi=r.doi?r.doi.replace("https://doi.org/",""):"";
+  const L=["TY  - JOUR",`TI  - ${r.title}`];
+  (r.authors||"").split(",").forEach(a=>L.push(`AU  - ${a.trim()}`));
+  if(r.year) L.push(`PY  - ${r.year}`); if(r.journal) L.push(`JO  - ${r.journal}`);
+  if(doi) L.push(`DO  - ${doi}`); if(r.link||r.doi) L.push(`UR  - ${r.link||r.doi}`);
+  if(r.abstract) L.push(`AB  - ${r.abstract.slice(0,500)}`); L.push("ER  - "); return L.join("\n");
+}).join("\n\n");
+
+const toCSV = rs => { const e=s=>`"${(s||"").replace(/"/g,'""')}`; return ["Title,Authors,Year,Journal,DOI,Source,OA,Study Type",...rs.map(r=>[e(r.title),e(r.authors),r.year||"",e(r.journal),r.doi||r.link||"",r.source||"",r.isOA?"Yes":"No",r.studyType||""].join(","))].join("\n"); };
+
+// ── APIs ───────────────────────────────────────────────────────────────────────
 async function searchPubMed(q) {
-  const sd = await (await fetch(`https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&term=${encodeURIComponent(q)}&retmax=15&retmode=json&sort=relevance`)).json();
-  const ids = sd.esearchresult?.idlist||[];
-  if(!ids.length) return [];
-  const xml = await (await fetch(`https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&id=${ids.join(",")}&rettype=xml&retmode=xml`)).text();
-  const doc = new DOMParser().parseFromString(xml,"text/xml");
+  const sd=await(await fetch(`https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&term=${encodeURIComponent(q)}&retmax=15&retmode=json&sort=relevance`)).json();
+  const ids=sd.esearchresult?.idlist||[]; if(!ids.length) return [];
+  const xml=await(await fetch(`https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&id=${ids.join(",")}&rettype=xml&retmode=xml`)).text();
+  const doc=new DOMParser().parseFromString(xml,"text/xml");
   return Array.from(doc.querySelectorAll("PubmedArticle")).map(a=>{
-    const pmid = a.querySelector("PMID")?.textContent;
-    const title = cleanHtml(a.querySelector("ArticleTitle")?.textContent||"Untitled");
-    const abParts = Array.from(a.querySelectorAll("AbstractText")).map(t=>{const l=t.getAttribute("Label");return l?`${l}: ${t.textContent}`:t.textContent;});
-    const authEls = Array.from(a.querySelectorAll("Author"));
-    const auths = authEls.slice(0,4).map(el=>`${el.querySelector("LastName")?.textContent||""} ${el.querySelector("Initials")?.textContent||""}`.trim());
-    const doi = a.querySelector('ArticleId[IdType="doi"]')?.textContent||null;
-    const abstract = truncate(abParts.join(" ")||null);
-    return { id:`pm-${pmid}`, source:"pubmed", title, abstract, studyType:guessStudyType(title,abstract||""), authors:auths.join(", ")+(authEls.length>4?" et al.":""), year:a.querySelector("PubDate Year")?.textContent||a.querySelector("PubDate MedlineDate")?.textContent?.slice(0,4)||"n.d.", journal:a.querySelector("Journal Title")?.textContent||a.querySelector("MedlineTA")?.textContent||"", doi:doi?`https://doi.org/${doi}`:null, link:`https://pubmed.ncbi.nlm.nih.gov/${pmid}/`, pdfUrl:null, isOA:false, oaChecked:false, citationCount:null };
+    const pmid=a.querySelector("PMID")?.textContent;
+    const title=clean(a.querySelector("ArticleTitle")?.textContent||"Untitled");
+    const abParts=Array.from(a.querySelectorAll("AbstractText")).map(t=>{const l=t.getAttribute("Label");return l?`${l}: ${t.textContent}`:t.textContent;});
+    const authEls=Array.from(a.querySelectorAll("Author"));
+    const doi=a.querySelector('ArticleId[IdType="doi"]')?.textContent||null;
+    const abstract=trunc(abParts.join(" ")||null);
+    return {id:`pm-${pmid}`,source:"pubmed",title,abstract,studyType:studyType(title,abstract||""),authors:authEls.slice(0,4).map(el=>`${el.querySelector("LastName")?.textContent||""} ${el.querySelector("Initials")?.textContent||""}`.trim()).join(", ")+(authEls.length>4?" et al.":""),year:a.querySelector("PubDate Year")?.textContent||a.querySelector("PubDate MedlineDate")?.textContent?.slice(0,4)||"n.d.",journal:a.querySelector("Journal Title")?.textContent||a.querySelector("MedlineTA")?.textContent||"",doi:doi?`https://doi.org/${doi}`:null,link:`https://pubmed.ncbi.nlm.nih.gov/${pmid}/`,pdfUrl:null,isOA:false,oaChecked:false,citationCount:null};
   });
 }
 
 async function searchEuropePMC(q) {
-  const d = await (await fetch(`https://www.ebi.ac.uk/europepmc/webservices/rest/search?query=${encodeURIComponent(q)}&format=json&pageSize=15&resultType=core&sort=relevance`)).json();
-  return (d.resultList?.result||[]).map(p=>{
-    const abstract=truncate(p.abstractText||null);
-    return { id:`epmc-${p.id}`, source:"europepmc", title:cleanHtml(p.title||"Untitled"), abstract, studyType:guessStudyType(p.title||"",abstract||""), authors:(p.authorString?.length>90?p.authorString.slice(0,90)+"…":p.authorString)||"Unknown", year:String(p.pubYear||"n.d."), journal:p.journalTitle||"", doi:p.doi?`https://doi.org/${p.doi}`:null, link:p.doi?`https://doi.org/${p.doi}`:`https://europepmc.org/article/${p.source}/${p.id}`, pdfUrl:p.fullTextUrlList?.fullTextUrl?.find(u=>u.documentStyle==="pdf")?.url||null, isOA:!!p.isOpenAccess, oaChecked:true, citationCount:p.citedByCount||null };
-  });
+  const d=await(await fetch(`https://www.ebi.ac.uk/europepmc/webservices/rest/search?query=${encodeURIComponent(q)}&format=json&pageSize=15&resultType=core&sort=relevance`)).json();
+  return (d.resultList?.result||[]).map(p=>{const abstract=trunc(p.abstractText||null);return{id:`epmc-${p.id}`,source:"europepmc",title:clean(p.title||"Untitled"),abstract,studyType:studyType(p.title||"",abstract||""),authors:(p.authorString?.length>90?p.authorString.slice(0,90)+"…":p.authorString)||"Unknown",year:String(p.pubYear||"n.d."),journal:p.journalTitle||"",doi:p.doi?`https://doi.org/${p.doi}`:null,link:p.doi?`https://doi.org/${p.doi}`:`https://europepmc.org/article/${p.source}/${p.id}`,pdfUrl:p.fullTextUrlList?.fullTextUrl?.find(u=>u.documentStyle==="pdf")?.url||null,isOA:!!p.isOpenAccess,oaChecked:true,citationCount:p.citedByCount||null};});
 }
 
 async function searchSemanticScholar(q) {
-  const d = await (await fetch(`https://api.semanticscholar.org/graph/v1/paper/search?query=${encodeURIComponent(q)}&limit=15&fields=title,authors,year,venue,externalIds,openAccessPdf,abstract,citationCount`)).json();
-  return (d.data||[]).map(p=>{
-    const abstract=truncate(p.abstract||null);
-    return { id:`ss-${p.paperId}`, source:"semanticscholar", title:cleanHtml(p.title||"Untitled"), abstract, studyType:guessStudyType(p.title||"",abstract||""), authors:(p.authors?.slice(0,4).map(a=>a.name).join(", ")||"Unknown")+(p.authors?.length>4?" et al.":""), year:p.year?String(p.year):"n.d.", journal:p.venue||"", doi:p.externalIds?.DOI?`https://doi.org/${p.externalIds.DOI}`:null, link:`https://www.semanticscholar.org/paper/${p.paperId}`, pdfUrl:p.openAccessPdf?.url||null, isOA:!!p.openAccessPdf?.url, oaChecked:true, citationCount:p.citationCount??null };
-  });
+  const d=await(await fetch(`https://api.semanticscholar.org/graph/v1/paper/search?query=${encodeURIComponent(q)}&limit=15&fields=title,authors,year,venue,externalIds,openAccessPdf,abstract,citationCount`)).json();
+  return (d.data||[]).map(p=>{const abstract=trunc(p.abstract||null);return{id:`ss-${p.paperId}`,source:"semanticscholar",title:clean(p.title||"Untitled"),abstract,studyType:studyType(p.title||"",abstract||""),authors:(p.authors?.slice(0,4).map(a=>a.name).join(", ")||"Unknown")+(p.authors?.length>4?" et al.":""),year:p.year?String(p.year):"n.d.",journal:p.venue||"",doi:p.externalIds?.DOI?`https://doi.org/${p.externalIds.DOI}`:null,link:`https://www.semanticscholar.org/paper/${p.paperId}`,pdfUrl:p.openAccessPdf?.url||null,isOA:!!p.openAccessPdf?.url,oaChecked:true,citationCount:p.citationCount??null};});
 }
 
 async function searchOpenAlex(q) {
-  const d = await (await fetch(`https://api.openalex.org/works?search=${encodeURIComponent(q)}&per-page=15&sort=relevance_score&mailto=medlitsearch@user.tool`)).json();
-  return (d.results||[]).map(p=>{
-    const abstract=truncate(reconstructAbstract(p.abstract_inverted_index));
-    return { id:`oa-${p.id}`, source:"openalex", title:cleanHtml(p.title||"Untitled"), abstract, studyType:guessStudyType(p.title||"",abstract||""), authors:(p.authorships?.slice(0,4).map(a=>a.author?.display_name).filter(Boolean).join(", ")||"Unknown")+(p.authorships?.length>4?" et al.":""), year:p.publication_year?String(p.publication_year):"n.d.", journal:p.primary_location?.source?.display_name||"", doi:p.doi||null, link:p.doi||p.id, pdfUrl:p.open_access?.oa_url||null, isOA:!!p.open_access?.is_oa, oaChecked:true, citationCount:p.cited_by_count??null };
-  });
+  const d=await(await fetch(`https://api.openalex.org/works?search=${encodeURIComponent(q)}&per-page=15&sort=relevance_score&mailto=medlitsearch@user.tool`)).json();
+  return (d.results||[]).map(p=>{const abstract=trunc(rebuildAbstract(p.abstract_inverted_index));return{id:`oa-${p.id}`,source:"openalex",title:clean(p.title||"Untitled"),abstract,studyType:studyType(p.title||"",abstract||""),authors:(p.authorships?.slice(0,4).map(a=>a.author?.display_name).filter(Boolean).join(", ")||"Unknown")+(p.authorships?.length>4?" et al.":""),year:p.publication_year?String(p.publication_year):"n.d.",journal:p.primary_location?.source?.display_name||"",doi:p.doi||null,link:p.doi||p.id,pdfUrl:p.open_access?.oa_url||null,isOA:!!p.open_access?.is_oa,oaChecked:true,citationCount:p.cited_by_count??null};});
 }
 
 async function searchCrossRef(q) {
-  const d = await (await fetch(`https://api.crossref.org/works?query.bibliographic=${encodeURIComponent(q)}&rows=12&select=DOI,title,author,published,container-title,abstract&mailto=medlitsearch@user.tool`)).json();
-  return (d.message?.items||[]).map(p=>{
-    const doi=p.DOI; const yr=p.published?.["date-parts"]?.[0]?.[0];
-    const title=cleanHtml(Array.isArray(p.title)?p.title[0]:(p.title||"Untitled"));
-    const abstract=truncate(p.abstract?cleanHtml(p.abstract):null);
-    return { id:`cr-${doi}`, source:"crossref", title, abstract, studyType:guessStudyType(title,abstract||""), authors:(p.author?.slice(0,4).map(a=>`${a.family||""} ${(a.given||"").slice(0,1)}`.trim()).join(", ")||"Unknown")+(p.author?.length>4?" et al.":""), year:yr?String(yr):"n.d.", journal:Array.isArray(p["container-title"])?p["container-title"][0]:(p["container-title"]||""), doi:`https://doi.org/${doi}`, link:`https://doi.org/${doi}`, pdfUrl:null, isOA:false, oaChecked:false, citationCount:null };
-  });
+  const d=await(await fetch(`https://api.crossref.org/works?query.bibliographic=${encodeURIComponent(q)}&rows=12&select=DOI,title,author,published,container-title,abstract&mailto=medlitsearch@user.tool`)).json();
+  return (d.message?.items||[]).map(p=>{const doi=p.DOI,yr=p.published?.["date-parts"]?.[0]?.[0];const title=clean(Array.isArray(p.title)?p.title[0]:(p.title||"Untitled"));const abstract=trunc(p.abstract?clean(p.abstract):null);return{id:`cr-${doi}`,source:"crossref",title,abstract,studyType:studyType(title,abstract||""),authors:(p.author?.slice(0,4).map(a=>`${a.family||""} ${(a.given||"").slice(0,1)}`.trim()).join(", ")||"Unknown")+(p.author?.length>4?" et al.":""),year:yr?String(yr):"n.d.",journal:Array.isArray(p["container-title"])?p["container-title"][0]:(p["container-title"]||""),doi:`https://doi.org/${doi}`,link:`https://doi.org/${doi}`,pdfUrl:null,isOA:false,oaChecked:false,citationCount:null};});
 }
 
 async function searchDOAJ(q) {
-  const d = await (await fetch(`https://doaj.org/api/search/articles/${encodeURIComponent(q)}?page=1&pageSize=12`)).json();
-  return (d.results||[]).map(r=>{
-    const bib=r.bibjson||{}; const doiId=bib.identifier?.find(i=>i.type==="doi")?.id; const ft=bib.link?.find(l=>l.type==="fulltext")?.url;
-    const title=cleanHtml(bib.title||"Untitled"); const abstract=truncate(bib.abstract||null);
-    return { id:`doaj-${r.id}`, source:"doaj", title, abstract, studyType:guessStudyType(title,abstract||""), authors:(bib.author?.slice(0,4).map(a=>a.name).filter(Boolean).join(", ")||"Unknown")+(bib.author?.length>4?" et al.":""), year:String(bib.year||"n.d."), journal:bib.journal?.title||"", doi:doiId?`https://doi.org/${doiId}`:null, link:ft||(doiId?`https://doi.org/${doiId}`:`https://doaj.org/article/${r.id}`), pdfUrl:ft||null, isOA:true, oaChecked:true, citationCount:null };
-  });
+  const d=await(await fetch(`https://doaj.org/api/search/articles/${encodeURIComponent(q)}?page=1&pageSize=12`)).json();
+  return (d.results||[]).map(r=>{const bib=r.bibjson||{},doiId=bib.identifier?.find(i=>i.type==="doi")?.id,ft=bib.link?.find(l=>l.type==="fulltext")?.url;const title=clean(bib.title||"Untitled");const abstract=trunc(bib.abstract||null);return{id:`doaj-${r.id}`,source:"doaj",title,abstract,studyType:studyType(title,abstract||""),authors:(bib.author?.slice(0,4).map(a=>a.name).filter(Boolean).join(", ")||"Unknown")+(bib.author?.length>4?" et al.":""),year:String(bib.year||"n.d."),journal:bib.journal?.title||"",doi:doiId?`https://doi.org/${doiId}`:null,link:ft||(doiId?`https://doi.org/${doiId}`:`https://doaj.org/article/${r.id}`),pdfUrl:ft||null,isOA:true,oaChecked:true,citationCount:null};});
 }
 
 async function checkUnpaywall(doi) {
   if(!doi) return null;
-  const d = await (await fetch(`https://api.unpaywall.org/v2/${encodeURIComponent(doi.replace("https://doi.org/",""))}?email=medlitsearch@user.tool`)).json();
+  const d=await(await fetch(`https://api.unpaywall.org/v2/${encodeURIComponent(doi.replace("https://doi.org/",""))}?email=medlitsearch@user.tool`)).json();
   if(d.is_oa){const loc=d.best_oa_location;return{isOA:true,pdfUrl:loc?.url_for_pdf||loc?.url||null};}
-  return {isOA:false,pdfUrl:null};
+  return{isOA:false,pdfUrl:null};
 }
 
-async function enhanceQuery(rawQuery, apiKey) {
-  const d = await (await fetch("https://api.anthropic.com/v1/messages",{
-    method:"POST",
-    headers:{"Content-Type":"application/json","x-api-key":apiKey,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
-    body:JSON.stringify({model:"claude-opus-4-7",max_tokens:200,
-      system:"You are a medical research librarian expert in boolean database search. Convert the user's plain-English research topic into an optimized search string using synonyms, MeSH-style terms, and boolean operators (AND/OR). Keep it under 150 characters. Return ONLY the search string — no explanation.",
-      messages:[{role:"user",content:rawQuery}]})
-  })).json();
+async function enhanceQuery(q, key) {
+  const d=await(await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json","x-api-key":key,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},body:JSON.stringify({model:"claude-opus-4-7",max_tokens:150,system:"Medical research librarian. Convert the user's topic into an optimised boolean search string using synonyms and MeSH-style terms. Max 120 chars. Return ONLY the string.",messages:[{role:"user",content:q}]})})).json();
   if(d.error) throw new Error(d.error.message);
-  return d.content?.[0]?.text?.trim()||rawQuery;
+  return d.content?.[0]?.text?.trim()||q;
 }
 
-async function summarizeWithAI(papers, query, apiKey) {
-  const list = papers.slice(0,20).map((p,i)=>`${i+1}. "${p.title}" (${p.year})${p.journal?` — ${p.journal}`:""}${p.studyType?` [${p.studyType}]`:""}${p.abstract?`\n${p.abstract.slice(0,300)}`:""}`).join("\n\n");
-  const d = await (await fetch("https://api.anthropic.com/v1/messages",{
-    method:"POST",
-    headers:{"Content-Type":"application/json","x-api-key":apiKey,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
-    body:JSON.stringify({model:"claude-opus-4-7",max_tokens:1600,
-      system:"You are a senior medical research librarian and evidence-based practice specialist. Analyse the search results and return ONLY valid JSON — no markdown fences, no extra text.",
-      messages:[{role:"user",content:`Search query: "${query}"\n\nPapers:\n${list}\n\nReturn exactly:\n{"overview":"3-4 sentence synthesis","themes":["theme1","theme2","theme3","theme4"],"study_types":["list unique study types found"],"evidence_level":"HIGH or MODERATE or LOW or MIXED","clinical_implications":"1-2 sentences on clinical practice implications","gaps":"1-2 sentences on research gaps","suggested_terms":["3-4 related searches"]}`}]})
-  })).json();
+async function synthesise(papers, q, key) {
+  const list=papers.slice(0,20).map((p,i)=>`${i+1}. "${p.title}" (${p.year})${p.journal?` — ${p.journal}`:""}${p.studyType?` [${p.studyType}]`:""}${p.abstract?`\n${p.abstract.slice(0,280)}`:""}`).join("\n\n");
+  const d=await(await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json","x-api-key":key,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},body:JSON.stringify({model:"claude-opus-4-7",max_tokens:1400,system:"Senior medical research librarian. Return ONLY valid JSON, no markdown.",messages:[{role:"user",content:`Query: "${q}"\n\nPapers:\n${list}\n\nReturn: {"overview":"3-4 sentence synthesis","themes":["t1","t2","t3","t4"],"study_types":["list unique types"],"evidence_level":"HIGH or MODERATE or LOW or MIXED","clinical_implications":"1-2 sentences","gaps":"1-2 sentences","suggested_terms":["3-4 related searches"]}`}]})})).json();
   if(d.error) throw new Error(d.error.message);
   return JSON.parse((d.content?.[0]?.text||"{}").replace(/```json|```/g,"").trim());
 }
 
-// ── Static Data ────────────────────────────────────────────────────────────────
+// ── Static ─────────────────────────────────────────────────────────────────────
+const SRC_META={pubmed:{label:"PubMed",badge:"b-pubmed"},europepmc:{label:"Europe PMC",badge:"b-europepmc"},semanticscholar:{label:"Sem. Scholar",badge:"b-semanticscholar"},openalex:{label:"OpenAlex",badge:"b-openalex"},crossref:{label:"CrossRef",badge:"b-crossref"},doaj:{label:"DOAJ",badge:"b-doaj"}};
+const ST_CSS={"Systematic Review":"st-sr","RCT":"st-rct","Cohort":"st-cohort","Qualitative":"st-qual","Cross-Sectional":"st-cross","Review":"st-review","Case Report":"st-case"};
 
-const SRC_META = {
-  pubmed:          {label:"PubMed",         badge:"b-pubmed"},
-  europepmc:       {label:"Europe PMC",      badge:"b-europepmc"},
-  semanticscholar: {label:"Sem. Scholar",    badge:"b-semanticscholar"},
-  openalex:        {label:"OpenAlex",        badge:"b-openalex"},
-  crossref:        {label:"CrossRef",        badge:"b-crossref"},
-  doaj:            {label:"DOAJ",            badge:"b-doaj"},
-};
-
-const ST_CSS = {"Systematic Review":"st-sr","RCT":"st-rct","Cohort":"st-cohort","Qualitative":"st-qual","Cross-Sectional":"st-cross","Review":"st-review","Case Report":"st-case"};
-
-const EXAMPLES = ["postnatal depression maternal mental health","nurse-led sepsis early recognition","hand hygiene compliance intensive care","breastfeeding support low-income populations","pressure injury prevention elderly","opioid pain management palliative care"];
-
-const PAYWALL_DBS = [
-  {name:"CINAHL",     color:"#2563eb", bg:"#dbeafe", getUrl:q=>`https://search.ebscohost.com/login.aspx?direct=true&db=cin20&bquery=${encodeURIComponent(q)}&type=1&site=ehost-live`},
-  {name:"Scopus",     color:"#b45309", bg:"#fef3c7", getUrl:q=>`https://www.scopus.com/search/form.uri?display=basic&query=${encodeURIComponent(q)}`},
-  {name:"Cochrane",   color:"#1d4ed8", bg:"#eff6ff", getUrl:q=>`https://www.cochranelibrary.com/search?searchBy=6&searchText=${encodeURIComponent(q)}`},
-  {name:"Web of Sci", color:"#991b1b", bg:"#fef2f2", getUrl:q=>`https://www.webofscience.com/wos/woscc/basic-search?query=${encodeURIComponent(q)}&field=ALL`},
-  {name:"PsycINFO",   color:"#9a3412", bg:"#fff7ed", getUrl:q=>`https://search.ebscohost.com/login.aspx?direct=true&db=psyh&bquery=${encodeURIComponent(q)}&type=1&site=ehost-live`},
-  {name:"AMED",       color:"#065f46", bg:"#ecfdf5", getUrl:q=>`https://search.ebscohost.com/login.aspx?direct=true&db=amed&bquery=${encodeURIComponent(q)}&type=1&site=ehost-live`},
-  {name:"ProQuest",   color:"#1e40af", bg:"#eff6ff", getUrl:q=>`https://search.proquest.com/search?query=${encodeURIComponent(q)}&searchtype=basic`},
-  {name:"MIDIRS",     color:"#6b21a8", bg:"#f5f3ff", getUrl:q=>`https://www.midirs.org/evidence/maternity-and-infant-care/search/?query=${encodeURIComponent(q)}`},
+const PAYWALL_DBS=[
+  {name:"CINAHL",     color:"#1d4ed8",bg:"#dbeafe",getUrl:q=>`https://search.ebscohost.com/login.aspx?direct=true&db=cin20&bquery=${encodeURIComponent(q)}&type=1&site=ehost-live`},
+  {name:"Scopus",     color:"#92400e",bg:"#fef3c7",getUrl:q=>`https://www.scopus.com/search/form.uri?display=basic&query=${encodeURIComponent(q)}`},
+  {name:"Cochrane",   color:"#1e40af",bg:"#eff6ff",getUrl:q=>`https://www.cochranelibrary.com/search?searchBy=6&searchText=${encodeURIComponent(q)}`},
+  {name:"Web of Sci", color:"#991b1b",bg:"#fef2f2",getUrl:q=>`https://www.webofscience.com/wos/woscc/basic-search?query=${encodeURIComponent(q)}&field=ALL`},
+  {name:"PsycINFO",   color:"#9a3412",bg:"#fff7ed",getUrl:q=>`https://search.ebscohost.com/login.aspx?direct=true&db=psyh&bquery=${encodeURIComponent(q)}&type=1&site=ehost-live`},
+  {name:"AMED",       color:"#065f46",bg:"#ecfdf5",getUrl:q=>`https://search.ebscohost.com/login.aspx?direct=true&db=amed&bquery=${encodeURIComponent(q)}&type=1&site=ehost-live`},
+  {name:"ProQuest",   color:"#1e3a8a",bg:"#eff6ff",getUrl:q=>`https://search.proquest.com/search?query=${encodeURIComponent(q)}&searchtype=basic`},
+  {name:"MIDIRS",     color:"#6b21a8",bg:"#f5f3ff",getUrl:q=>`https://www.midirs.org/evidence/maternity-and-infant-care/search/?query=${encodeURIComponent(q)}`},
 ];
 
-const WORKAROUNDS = [
-  {icon:"🔓",name:"Unpaywall",type:"legal",desc:"Finds legal free versions of paywalled papers via preprints, repositories, and author manuscripts. Integrated into this tool.",url:"https://unpaywall.org",ul:"Get browser extension"},
-  {icon:"🟢",name:"Open Access Button",type:"legal",desc:"Locates legal preprint or repository versions, and can send automated requests to authors for a copy.",url:"https://openaccessbutton.org",ul:"Visit oabutton.org"},
-  {icon:"🏛️",name:"PubMed Central",type:"free",desc:"All NIH-funded research is freely deposited here. Many paywalled journals have identical free PMC versions.",url:"https://www.ncbi.nlm.nih.gov/pmc/",ul:"Search PMC"},
-  {icon:"📄",name:"medRxiv / bioRxiv",type:"free",desc:"Preprint servers with early versions of health and life science papers — freely available before journal publication.",url:"https://www.medrxiv.org",ul:"Browse medRxiv"},
-  {icon:"📧",name:"Email the Author",type:"tip",desc:"Authors almost always share their own work. Find their email on ResearchGate or their institution's staff page.",url:"https://www.researchgate.net",ul:"Find on ResearchGate"},
-  {icon:"🏫",name:"Interlibrary Loan",type:"free",desc:"Any university or NHS library member can request paywalled papers for free via ILL — fulfilled within 24–48 hours.",url:"https://www.bl.uk/services/document-supply",ul:"British Library ILL"},
+const WORKAROUNDS=[
+  {icon:"🔓",name:"Unpaywall",type:"legal",desc:"Finds legal free versions via preprints and author manuscripts. Already integrated into this tool.",url:"https://unpaywall.org",ul:"Browser extension"},
+  {icon:"🟢",name:"Open Access Button",type:"legal",desc:"Locates legal preprint versions and can request copies from authors.",url:"https://openaccessbutton.org",ul:"oabutton.org"},
+  {icon:"🏛️",name:"PubMed Central",type:"free",desc:"All NIH-funded research is freely deposited here — often identical to the paywalled version.",url:"https://www.ncbi.nlm.nih.gov/pmc/",ul:"Search PMC"},
+  {icon:"📄",name:"medRxiv",type:"free",desc:"Preprint server for health sciences — freely available before publication.",url:"https://www.medrxiv.org",ul:"Browse"},
+  {icon:"📧",name:"Email the Author",type:"tip",desc:"Authors almost always share their own work. Find them on ResearchGate.",url:"https://www.researchgate.net",ul:"ResearchGate"},
+  {icon:"🏫",name:"Interlibrary Loan",type:"free",desc:"Request any paywalled paper free via your university or NHS library — 24–48 hours.",url:"https://www.bl.uk/services/document-supply",ul:"British Library ILL"},
 ];
 
-// ── Mini components ────────────────────────────────────────────────────────────
+const EXAMPLES=["postnatal depression maternal mental health","nurse-led sepsis recognition","hand hygiene ICU infection prevention","breastfeeding support interventions","pressure injury prevention elderly","opioid management palliative care"];
 
-const StudyBadge = ({type}) => {
-  const cls = type && ST_CSS[type];
-  return cls ? <span className={`stbadge ${cls}`}>{type}</span> : null;
-};
-
-const EvBadge = ({level}) => {
-  if(!level) return null;
-  const cls={HIGH:"ev-high",MODERATE:"ev-moderate",LOW:"ev-low",MIXED:"ev-mixed"}[level.toUpperCase()]||"ev-mixed";
-  return <span className={`ai-ev ${cls}`}>Evidence: {level}</span>;
-};
+// ── Components ─────────────────────────────────────────────────────────────────
+const SBadge=({type})=>{ const c=type&&ST_CSS[type]; return c?<span className={`stbadge ${c}`}>{type}</span>:null; };
+const EvBadge=({level})=>{ if(!level) return null; const c={HIGH:"ev-high",MODERATE:"ev-moderate",LOW:"ev-low",MIXED:"ev-mixed"}[level.toUpperCase()]||"ev-mixed"; return <span className={`ai-ev ${c}`}>{level}</span>; };
 
 // ── App ────────────────────────────────────────────────────────────────────────
-
 function App() {
   const [kw, setKw] = useState("postnatal depression maternal mental health");
-  const [searchMode, setSearchMode] = useState("free");
+  const [mode, setMode] = useState("free");
   const [pico, setPico] = useState({p:"",i:"",c:"",o:""});
-  const [smartSearch, setSmartSearch] = useState(false);
-  const [enhancedQuery, setEnhancedQuery] = useState(null);
+  const [smart, setSmart] = useState(false);
+  const [eqUsed, setEqUsed] = useState(null);
 
-  const [apiKey, setApiKey] = useState(() => localStorage.getItem("ml-api-key")||"");
-  const [apiKeyInput, setApiKeyInput] = useState(() => localStorage.getItem("ml-api-key")||"");
-  // eslint-disable-next-line no-unused-vars — kept for saveSettings parity
-  const [institutionName, setInstitutionName] = useState(() => localStorage.getItem("ml-inst-name")||"");
-  const [ezproxyUrl, setEzproxyUrl] = useState(() => localStorage.getItem("ml-ezproxy")||"");
-  const [instNameInput, setInstNameInput] = useState(() => localStorage.getItem("ml-inst-name")||"");
-  const [ezproxyInput, setEzproxyInput] = useState(() => localStorage.getItem("ml-ezproxy")||"");
+  const [apiKey, setApiKey] = useState(()=>localStorage.getItem("ml-key")||"");
+  const [showModal, setShowModal] = useState(false);
+  const [mKey, setMKey] = useState(()=>localStorage.getItem("ml-key")||"");
+  const [mInst, setMInst] = useState(()=>localStorage.getItem("ml-inst")||"");
+  const [mProxy, setMProxy] = useState(()=>localStorage.getItem("ml-proxy")||"");
+  const [inst, setInst] = useState(()=>localStorage.getItem("ml-inst")||"");
+  const [proxy, setProxy] = useState(()=>localStorage.getItem("ml-proxy")||"");
 
   const [results, setResults] = useState({pubmed:[],europepmc:[],semanticscholar:[],openalex:[],crossref:[],doaj:[]});
   const [loading, setLoading] = useState({pubmed:false,europepmc:false,semanticscholar:false,openalex:false,crossref:false,doaj:false});
   const [errors, setErrors] = useState({});
-  const [activeSource, setActiveSource] = useState("all");
+  const [activeSrc, setActiveSrc] = useState("all");
   const [sortBy, setSortBy] = useState("smart");
-  const [aiSummary, setAiSummary] = useState(null);
-  const [aiLoading, setAiLoading] = useState(false);
-  const [aiDismissed, setAiDismissed] = useState(false);
+  const [aiSum, setAiSum] = useState(null);
+  const [aiLoad, setAiLoad] = useState(false);
+  const [aiOff, setAiOff] = useState(false);
   const [oaStatus, setOaStatus] = useState({});
-  const [hasSearched, setHasSearched] = useState(false);
+  const [searched, setSearched] = useState(false);
   const [toast, setToast] = useState(null);
-  const [showExport, setShowExport] = useState(false);
+  const [showExp, setShowExp] = useState(false);
   const [bookmarks, setBookmarks] = useState(new Set());
-  const [showBookmarks, setShowBookmarks] = useState(false);
-  const [expandedAbs, setExpandedAbs] = useState(new Set());
-  const [yearFrom, setYearFrom] = useState("");
-  const [yearTo, setYearTo] = useState("");
+  const [showBk, setShowBk] = useState(false);
+  const [expanded, setExpanded] = useState(new Set());
+  const [yrFrom, setYrFrom] = useState("");
+  const [yrTo, setYrTo] = useState("");
   const [oaOnly, setOaOnly] = useState(false);
   const [autoBatch, setAutoBatch] = useState(false);
-  const [showAdv, setShowAdv] = useState(false);
-  const [searchHistory, setSearchHistory] = useState(() => { try{return JSON.parse(sessionStorage.getItem("ml-hist")||"[]");}catch{return[];} });
+  const [showFilt, setShowFilt] = useState(false);
+  const [history, setHistory] = useState(()=>{try{return JSON.parse(sessionStorage.getItem("ml-hist")||"[]");}catch{return[];}});
 
-  const toastRef = useRef(null);
-  const expRef = useRef(null);
+  const toastRef=useRef(null), expRef=useRef(null);
 
-  useEffect(() => {
-    if(!showExport) return;
-    const h = e => { if(expRef.current&&!expRef.current.contains(e.target)) setShowExport(false); };
-    document.addEventListener("mousedown",h);
-    return ()=>document.removeEventListener("mousedown",h);
-  },[showExport]);
+  useEffect(()=>{ if(!showExp) return; const h=e=>{if(expRef.current&&!expRef.current.contains(e.target)) setShowExp(false);}; document.addEventListener("mousedown",h); return()=>document.removeEventListener("mousedown",h); },[showExp]);
 
-  const showToast = msg => { setToast(msg); if(toastRef.current) clearTimeout(toastRef.current); toastRef.current=setTimeout(()=>setToast(null),3200); };
+  const showToast=msg=>{setToast(msg);if(toastRef.current) clearTimeout(toastRef.current);toastRef.current=setTimeout(()=>setToast(null),3000);};
 
-  const saveSettings = () => {
-    setApiKey(apiKeyInput); setInstitutionName(instNameInput); setEzproxyUrl(ezproxyInput);
-    localStorage.setItem("ml-api-key", apiKeyInput);
-    localStorage.setItem("ml-inst-name", instNameInput);
-    localStorage.setItem("ml-ezproxy", ezproxyInput);
-    showToast("✓ Settings saved — keys stored on this device");
+  const saveModal=()=>{
+    setApiKey(mKey);setInst(mInst);setProxy(mProxy);
+    localStorage.setItem("ml-key",mKey);localStorage.setItem("ml-inst",mInst);localStorage.setItem("ml-proxy",mProxy);
+    setShowModal(false);showToast("✓ Settings saved");
   };
 
-  const proxyLink = url => ezproxyUrl && url ? `${ezproxyUrl.replace(/\/$/,"")}${ezproxyUrl.includes("?")?"":"/login?url="}${encodeURIComponent(url)}` : url;
+  const proxify=url=>proxy&&url?`${proxy.replace(/\/$/,"")}${proxy.includes("?")?"":"/login?url="}${encodeURIComponent(url)}`:url;
 
-  const effectiveQuery = searchMode==="pico" ? buildPicoQuery(pico.p,pico.i,pico.c,pico.o) : kw;
+  const eq=mode==="pico"?picoQ(pico.p,pico.i,pico.c,pico.o):kw;
 
-  const runSearch = useCallback(async (overrideQ) => {
-    const raw = overrideQ!==undefined ? overrideQ : effectiveQuery;
+  const runSearch=useCallback(async(override)=>{
+    const raw=override!==undefined?override:eq;
     if(!raw.trim()) return;
-    if(overrideQ!==undefined){setSearchMode("free");setKw(overrideQ);}
+    if(override!==undefined){setMode("free");setKw(override);}
+    setSearched(true);setResults({pubmed:[],europepmc:[],semanticscholar:[],openalex:[],crossref:[],doaj:[]});
+    setErrors({});setOaStatus({});setAiSum(null);setAiOff(false);setActiveSrc("all");setShowBk(false);setExpanded(new Set());setEqUsed(null);
+    setHistory(prev=>{const n=[raw.trim(),...prev.filter(h=>h!==raw.trim())].slice(0,5);try{sessionStorage.setItem("ml-hist",JSON.stringify(n));}catch{}return n;});
 
-    setHasSearched(true); setResults({pubmed:[],europepmc:[],semanticscholar:[],openalex:[],crossref:[],doaj:[]});
-    setErrors({}); setOaStatus({}); setAiSummary(null); setAiDismissed(false);
-    setActiveSource("all"); setShowBookmarks(false); setExpandedAbs(new Set()); setEnhancedQuery(null);
+    let q=raw;
+    if(smart&&apiKey){try{q=await enhanceQuery(raw,apiKey);setEqUsed(q);}catch{}}
 
-    setSearchHistory(prev=>{const next=[raw.trim(),...prev.filter(h=>h!==raw.trim())].slice(0,5);try{sessionStorage.setItem("ml-hist",JSON.stringify(next));}catch{}return next;});
-
-    let q = raw;
-    if(smartSearch && apiKey) {
-      try { q = await enhanceQuery(raw,apiKey); setEnhancedQuery(q); }
-      catch(e) { showToast("Smart query failed, using original"); }
-    }
-
-    const SRCS = [{key:"pubmed",fn:searchPubMed},{key:"europepmc",fn:searchEuropePMC},{key:"semanticscholar",fn:searchSemanticScholar},{key:"openalex",fn:searchOpenAlex},{key:"crossref",fn:searchCrossRef},{key:"doaj",fn:searchDOAJ}];
-    let acc = {pubmed:[],europepmc:[],semanticscholar:[],openalex:[],crossref:[],doaj:[]};
-
-    const proms = SRCS.map(({key,fn})=>{
+    const SRCS=[{key:"pubmed",fn:searchPubMed},{key:"europepmc",fn:searchEuropePMC},{key:"semanticscholar",fn:searchSemanticScholar},{key:"openalex",fn:searchOpenAlex},{key:"crossref",fn:searchCrossRef},{key:"doaj",fn:searchDOAJ}];
+    let acc={pubmed:[],europepmc:[],semanticscholar:[],openalex:[],crossref:[],doaj:[]};
+    const proms=SRCS.map(({key,fn})=>{
       setLoading(l=>({...l,[key]:true}));
-      return fn(q.trim())
-        .then(data=>{setResults(r=>({...r,[key]:data}));acc[key]=data;})
-        .catch(err=>setErrors(e=>({...e,[key]:err.message})))
-        .finally(()=>setLoading(l=>({...l,[key]:false})));
+      return fn(q.trim()).then(d=>{setResults(r=>({...r,[key]:d}));acc[key]=d;}).catch(e=>setErrors(e2=>({...e2,[key]:e.message}))).finally(()=>setLoading(l=>({...l,[key]:false})));
     });
-
     Promise.allSettled(proms).then(()=>{
-      const all = dedup([...acc.pubmed,...acc.europepmc,...acc.semanticscholar,...acc.openalex,...acc.crossref,...acc.doaj]);
-      if(all.length>=3&&apiKey){
-        setAiLoading(true);
-        summarizeWithAI(all,q.trim(),apiKey).then(s=>setAiSummary(s)).catch(e=>showToast("AI error: "+e.message)).finally(()=>setAiLoading(false));
-      }
-      if(autoBatch){
-        const toChk=all.filter(r=>r.doi&&!r.oaChecked);
-        let delay=0;
-        toChk.forEach(r=>{delay+=350;setTimeout(()=>{setOaStatus(s=>({...s,[r.id]:{checking:true}}));checkUnpaywall(r.doi).then(res=>setOaStatus(s=>({...s,[r.id]:{...res,checking:false}}))).catch(()=>setOaStatus(s=>({...s,[r.id]:{isOA:false,pdfUrl:null,checking:false}})));},delay);});
-        if(toChk.length) showToast(`Checking OA for ${toChk.length} papers…`);
-      }
+      const all=dedup([...acc.pubmed,...acc.europepmc,...acc.semanticscholar,...acc.openalex,...acc.crossref,...acc.doaj]);
+      if(all.length>=3&&apiKey){setAiLoad(true);synthesise(all,q.trim(),apiKey).then(s=>setAiSum(s)).catch(e=>showToast("AI: "+e.message)).finally(()=>setAiLoad(false));}
+      if(autoBatch){const chk=all.filter(r=>r.doi&&!r.oaChecked);let d=0;chk.forEach(r=>{d+=350;setTimeout(()=>{setOaStatus(s=>({...s,[r.id]:{checking:true}}));checkUnpaywall(r.doi).then(res=>setOaStatus(s=>({...s,[r.id]:{...res,checking:false}}))).catch(()=>setOaStatus(s=>({...s,[r.id]:{isOA:false,pdfUrl:null,checking:false}})));},d);});if(chk.length) showToast(`Checking OA for ${chk.length} papers…`);}
     });
-  },[effectiveQuery,apiKey,smartSearch,autoBatch]);
+  },[eq,apiKey,smart,autoBatch]);
 
-  const handleCheckOA = async (doi,id) => {
-    if(!doi||oaStatus[id]) return;
-    setOaStatus(s=>({...s,[id]:{checking:true}}));
-    try { const res=await checkUnpaywall(doi); setOaStatus(s=>({...s,[id]:{...res,checking:false}})); if(res.isOA) showToast("✓ Free version found!"); else showToast("No free version found. Try emailing the author."); }
-    catch { setOaStatus(s=>({...s,[id]:{isOA:false,pdfUrl:null,checking:false}})); }
-  };
+  const checkOA=async(doi,id)=>{if(!doi||oaStatus[id]) return;setOaStatus(s=>({...s,[id]:{checking:true}}));try{const r=await checkUnpaywall(doi);setOaStatus(s=>({...s,[id]:{...r,checking:false}}));if(r.isOA) showToast("✓ Free version found!");else showToast("No free version. Try emailing the author.");}catch{setOaStatus(s=>({...s,[id]:{isOA:false,pdfUrl:null,checking:false}}));}};
 
-  const allResults = dedup([...results.pubmed,...results.europepmc,...results.semanticscholar,...results.openalex,...results.crossref,...results.doaj]);
-  let displayed = activeSource==="all"?allResults:(results[activeSource]||[]);
-  if(oaOnly) displayed=displayed.filter(r=>r.isOA||oaStatus[r.id]?.isOA);
-  if(yearFrom) displayed=displayed.filter(r=>parseInt(r.year)>=parseInt(yearFrom));
-  if(yearTo) displayed=displayed.filter(r=>parseInt(r.year)<=parseInt(yearTo));
-  if(showBookmarks) displayed=displayed.filter(r=>bookmarks.has(r.id));
+  const allR=dedup([...results.pubmed,...results.europepmc,...results.semanticscholar,...results.openalex,...results.crossref,...results.doaj]);
+  let disp=activeSrc==="all"?allR:(results[activeSrc]||[]);
+  if(oaOnly) disp=disp.filter(r=>r.isOA||oaStatus[r.id]?.isOA);
+  if(yrFrom) disp=disp.filter(r=>parseInt(r.year)>=parseInt(yrFrom));
+  if(yrTo) disp=disp.filter(r=>parseInt(r.year)<=parseInt(yrTo));
+  if(showBk) disp=disp.filter(r=>bookmarks.has(r.id));
+  const rawQ=eq||kw;
+  const sorted=[...disp].sort((a,b)=>sortBy==="year"?(parseInt(b.year)||0)-(parseInt(a.year)||0):sortBy==="smart"?scoreR(b,rawQ)-scoreR(a,rawQ):0);
+  const isLoading=Object.values(loading).some(Boolean);
+  const filtCount=[yrFrom,yrTo,oaOnly,autoBatch].filter(Boolean).length;
 
-  const rawQ = effectiveQuery||kw;
-  const sorted = [...displayed].sort((a,b)=>{
-    if(sortBy==="year") return (parseInt(b.year)||0)-(parseInt(a.year)||0);
-    if(sortBy==="smart") return scoreRelevance(b,rawQ)-scoreRelevance(a,rawQ);
-    return 0;
-  });
+  const doExport=type=>{setShowExp(false);if(!sorted.length){showToast("No results to export.");return;}if(type==="text"){navigator.clipboard.writeText(sorted.map(r=>`${r.title} (${r.year})${r.journal?` — ${r.journal}`:""}\n${r.doi||r.link}`).join("\n\n")).then(()=>showToast(`✓ ${sorted.length} references copied`));}else if(type==="bib") dlFile(toBibTeX(sorted),"medlit.bib","text/plain");else if(type==="ris") dlFile(toRIS(sorted),"medlit.ris","text/plain");else if(type==="csv") dlFile(toCSV(sorted),"medlit.csv","text/csv");};
 
-  const isLoading = Object.values(loading).some(Boolean);
-  const advCount = [yearFrom,yearTo,oaOnly,autoBatch].filter(Boolean).length;
-
-  const handleExport = type => {
-    setShowExport(false);
-    if(!sorted.length){showToast("No results to export.");return;}
-    if(type==="text"){ navigator.clipboard.writeText(sorted.map(r=>`${r.title} (${r.year})${r.journal?` — ${r.journal}`:""}\n${r.doi||r.link}`).join("\n\n")).then(()=>showToast(`✓ ${sorted.length} references copied`)); }
-    else if(type==="bib") dlFile(toBibTeX(sorted),"medlit-references.bib","text/plain");
-    else if(type==="ris") dlFile(toRIS(sorted),"medlit-references.ris","text/plain");
-    else if(type==="csv") dlFile(toCSV(sorted),"medlit-references.csv","text/csv");
-  };
-
-  const SRCS_LIST=[{key:"all",label:"All Results",count:allResults.length},{key:"pubmed",label:"PubMed",count:results.pubmed.length},{key:"europepmc",label:"Europe PMC",count:results.europepmc.length},{key:"semanticscholar",label:"Semantic Scholar",count:results.semanticscholar.length},{key:"openalex",label:"OpenAlex",count:results.openalex.length},{key:"crossref",label:"CrossRef",count:results.crossref.length},{key:"doaj",label:"DOAJ",count:results.doaj.length}];
+  const TABS=[{key:"all",label:"All",count:allR.length},{key:"pubmed",label:"PubMed",count:results.pubmed.length},{key:"europepmc",label:"Europe PMC",count:results.europepmc.length},{key:"semanticscholar",label:"Semantic Scholar",count:results.semanticscholar.length},{key:"openalex",label:"OpenAlex",count:results.openalex.length},{key:"crossref",label:"CrossRef",count:results.crossref.length},{key:"doaj",label:"DOAJ",count:results.doaj.length}];
 
   return (
-    <div className="app">
-
-      {/* ── Header ── */}
+    <div>
+      {/* Header */}
       <header className="hdr">
         <div className="hdr-inner">
-
-          <div className="brand">
-            <div className="brand-mark">⚕</div>
-            <div>
-              <div className="brand-name">MedLit Search</div>
-              <div className="brand-sub">Clinical evidence platform{institutionName?` · ${institutionName}`:""}</div>
-            </div>
-            <div className="brand-btns">
-              <button className={`hbtn ${smartSearch?"on":""}`} onClick={()=>setSmartSearch(v=>!v)} title="Claude reformulates your query into optimised boolean before searching">
-                ✦ Smart Search {smartSearch?"ON":"OFF"}
-              </button>
-            </div>
+          <div className="logo">
+            <div className="logo-mark">⚕</div>
+            <span className="logo-name">MedLit{inst?` · ${inst}`:""}</span>
           </div>
-
-          {/* Always-visible connection bar */}
-          <div className="conn-bar">
-            <div className="conn-field">
-              <span className="conn-ico">🔑</span>
-              <input
-                className="conn-input"
-                type="password"
-                placeholder="Anthropic API key (sk-ant-…)"
-                value={apiKeyInput}
-                onChange={e=>setApiKeyInput(e.target.value)}
-                onKeyDown={e=>e.key==="Enter"&&saveSettings()}
-              />
-              <span className="conn-status">
-                <span className={`cs-dot ${apiKey?"cs-on":"cs-off"}`}/>
-                <span style={{color:apiKey?"var(--teal-500)":"rgba(255,255,255,.35)",fontSize:11}}>{apiKey?"AI active":"No key"}</span>
-              </span>
-            </div>
-            <div className="conn-field">
-              <span className="conn-ico">🏛</span>
-              <input
-                className="conn-input"
-                type="text"
-                placeholder="Institution name (optional)"
-                value={instNameInput}
-                onChange={e=>setInstNameInput(e.target.value)}
-                onKeyDown={e=>e.key==="Enter"&&saveSettings()}
-              />
-            </div>
-            <div className="conn-field" style={{flexBasis:"100%"}}>
-              <span className="conn-ico">🔒</span>
-              <input
-                className="conn-input"
-                type="text"
-                placeholder="EZproxy URL — e.g. https://ezproxy.yourinstitution.ac.uk/login?url="
-                value={ezproxyInput}
-                onChange={e=>setEzproxyInput(e.target.value)}
-                onKeyDown={e=>e.key==="Enter"&&saveSettings()}
-                style={{flex:1}}
-              />
-              <span className="conn-status">
-                <span className={`cs-dot ${ezproxyUrl?"cs-on":"cs-off"}`}/>
-                <span style={{color:ezproxyUrl?"var(--teal-500)":"rgba(255,255,255,.35)",fontSize:11,whiteSpace:"nowrap"}}>{ezproxyUrl?`Proxy: ${(ezproxyUrl.split("/")[2]||"").slice(0,28)}`:"No proxy"}</span>
-              </span>
-            </div>
-            <button className="conn-save" onClick={saveSettings}>Save</button>
-          </div>
-
-          {/* Mode toggle */}
-          <div className="mode-bar">
-            <span className="mode-lbl">Mode:</span>
-            <button className={`mbtn ${searchMode==="free"?"active":""}`} onClick={()=>setSearchMode("free")}>Free Text</button>
-            <button className={`mbtn ${searchMode==="pico"?"active":""}`} onClick={()=>setSearchMode("pico")}>PICO</button>
-            {smartSearch && <span className="smart-badge">✦ AI query enhancement active</span>}
-          </div>
-
-          {searchMode==="pico" && (
-            <div>
-              <div className="pico-grid">
-                <div className="pf"><div className="plbl"><span className="pdot pd-p">P</span>Population / Patient</div><input className="pinp" placeholder="e.g. postmenopausal women" value={pico.p} onChange={e=>setPico(v=>({...v,p:e.target.value}))} onKeyDown={e=>e.key==="Enter"&&runSearch()} /></div>
-                <div className="pf"><div className="plbl"><span className="pdot pd-i">I</span>Intervention</div><input className="pinp" placeholder="e.g. hormone replacement therapy" value={pico.i} onChange={e=>setPico(v=>({...v,i:e.target.value}))} onKeyDown={e=>e.key==="Enter"&&runSearch()} /></div>
-                <div className="pf"><div className="plbl"><span className="pdot pd-c">C</span>Comparison <span style={{fontWeight:300,fontSize:10,color:"rgba(255,255,255,.3)"}}>optional</span></div><input className="pinp" placeholder="e.g. placebo" value={pico.c} onChange={e=>setPico(v=>({...v,c:e.target.value}))} onKeyDown={e=>e.key==="Enter"&&runSearch()} /></div>
-                <div className="pf"><div className="plbl"><span className="pdot pd-o">O</span>Outcome</div><input className="pinp" placeholder="e.g. cardiovascular events" value={pico.o} onChange={e=>setPico(v=>({...v,o:e.target.value}))} onKeyDown={e=>e.key==="Enter"&&runSearch()} /></div>
-              </div>
-            </div>
-          )}
-
-          <div className="srow">
-            <div className="swrap">
-              <span className="sico">🔍</span>
-              {searchMode==="free"
-                ? <input className="sinput" value={kw} onChange={e=>setKw(e.target.value)} onKeyDown={e=>e.key==="Enter"&&runSearch()} placeholder="Enter your research topic or clinical question…" />
-                : <input className="sinput" readOnly value={buildPicoQuery(pico.p,pico.i,pico.c,pico.o)||"Fill in the PICO fields above…"} style={{opacity:.7,cursor:"default"}} />}
-            </div>
-            <button className="sbtn" onClick={()=>runSearch()} disabled={isLoading||!effectiveQuery.trim()}>
-              {isLoading?<><div className="spin"/>Searching…</>:<>Search</>}
+          <div className="hdr-gap"/>
+          <div className="hdr-btns">
+            <button className={`hbtn ${smart?"on":""}`} onClick={()=>setSmart(v=>!v)} title="AI-optimises your query before searching">
+              ✦ Smart{smart?" ON":" OFF"}
             </button>
+            <button className="hbtn hbtn-icon" onClick={()=>setShowModal(true)} title="Settings">⚙</button>
           </div>
-
-          {enhancedQuery && enhancedQuery!==kw && (
-            <div className="eq-preview"><div className="eq-label">Smart query used</div>{enhancedQuery}</div>
-          )}
-
-          {/* Filters + history */}
-          <div className="adv-bar">
-            <button className={`adbtn ${showAdv?"on":""}`} onClick={()=>setShowAdv(v=>!v)}>
-              ⚙ Filters {advCount>0&&<span className="adn">{advCount}</span>}
-            </button>
-            {searchHistory.length>0&&(
-              <div className="hist-bar">
-                <span className="hlbl">Recent:</span>
-                {searchHistory.map((h,i)=><button key={i} className="hpill" title={h} onClick={()=>runSearch(h)}>{h}</button>)}
-              </div>
-            )}
-          </div>
-
-          {showAdv&&(
-            <div className="adv-panel">
-              <div className="fg"><div className="flbl">Year range</div><div className="yrrow"><input className="yrinp" type="number" placeholder="From" value={yearFrom} onChange={e=>setYearFrom(e.target.value)} /><span className="yrsep">—</span><input className="yrinp" type="number" placeholder="To" value={yearTo} onChange={e=>setYearTo(e.target.value)} /></div></div>
-              <div className="fg"><div className="flbl">Access</div><label className="chkrow"><input type="checkbox" checked={oaOnly} onChange={e=>setOaOnly(e.target.checked)}/><span className="chklbl">Open access only</span></label></div>
-              <div className="fg"><div className="flbl">Unpaywall</div><label className="chkrow"><input type="checkbox" checked={autoBatch} onChange={e=>setAutoBatch(e.target.checked)}/><span className="chklbl">Auto-check all results</span></label></div>
-              {(yearFrom||yearTo||oaOnly)&&<button className="adbtn" style={{alignSelf:"flex-end"}} onClick={()=>{setYearFrom("");setYearTo("");setOaOnly(false);}}>Clear</button>}
-            </div>
-          )}
-
         </div>
       </header>
 
+      {/* Settings Modal */}
+      {showModal && (
+        <div className="modal-bg" onClick={e=>{if(e.target===e.currentTarget) setShowModal(false);}}>
+          <div className="modal">
+            <div className="modal-hd">
+              <span className="modal-title">Settings</span>
+              <button className="modal-close" onClick={()=>setShowModal(false)}>✕</button>
+            </div>
+            <div className="mf">
+              <div className="mf-label">Anthropic API Key</div>
+              <input className="mf-input" type="password" placeholder="sk-ant-…" value={mKey} onChange={e=>setMKey(e.target.value)} onKeyDown={e=>e.key==="Enter"&&saveModal()} />
+              <div className="mf-hint">Enables AI synthesis and Smart Search. Saved to this device.</div>
+              {apiKey && <div className="mf-status">✓ Active</div>}
+            </div>
+            <div className="mf">
+              <div className="mf-label">Institution Name</div>
+              <input className="mf-input" type="text" placeholder="e.g. University of Leeds" value={mInst} onChange={e=>setMInst(e.target.value)} onKeyDown={e=>e.key==="Enter"&&saveModal()} />
+            </div>
+            <div className="mf">
+              <div className="mf-label">EZproxy URL</div>
+              <input className="mf-input" type="text" placeholder="https://ezproxy.yourinstitution.ac.uk/login?url=" value={mProxy} onChange={e=>setMProxy(e.target.value)} onKeyDown={e=>e.key==="Enter"&&saveModal()} style={{width:"100%"}} />
+              <div className="mf-hint">All paper links route through this automatically. Authenticate once per session at your institution's login page — nothing stored here except the URL.</div>
+              {proxy && <div className="mf-status">✓ Proxy: {(proxy.split("/")[2]||"").slice(0,30)}</div>}
+            </div>
+            <button className="modal-save" onClick={saveModal}>Save</button>
+          </div>
+        </div>
+      )}
+
+      {/* Search hero */}
+      <div className="hero">
+        <div className="hero-inner">
+          <div className="search-wrap">
+            <div className="search-box">
+              <span className="search-ico">🔍</span>
+              {mode==="free"
+                ? <input className="search-inp" value={kw} onChange={e=>setKw(e.target.value)} onKeyDown={e=>e.key==="Enter"&&runSearch()} placeholder="Search the clinical literature…" />
+                : <input className="search-inp" readOnly value={picoQ(pico.p,pico.i,pico.c,pico.o)||"Fill in the PICO fields below…"} style={{opacity:.7,cursor:"default"}} />}
+            </div>
+            <button className="search-btn" onClick={()=>runSearch()} disabled={isLoading||!eq.trim()}>
+              {isLoading?<><div className="spin"/>Searching…</>:"Search"}
+            </button>
+          </div>
+
+          <div className="search-sub">
+            <button className={`mode-pill ${mode==="free"?"active":""}`} onClick={()=>setMode("free")}>Free text</button>
+            <button className={`mode-pill ${mode==="pico"?"active":""}`} onClick={()=>setMode("pico")}>PICO</button>
+            <span className="sub-sep">·</span>
+            {history.map((h,i)=><button key={i} className="eq-pill" title={h} onClick={()=>runSearch(h)}>{h}</button>)}
+          </div>
+
+          {mode==="pico" && (
+            <div className="pico-wrap">
+              <div className="pf"><div className="pf-label"><span className="pf-dot pd-p">P</span>Population</div><input className="pf-inp" placeholder="e.g. postmenopausal women" value={pico.p} onChange={e=>setPico(v=>({...v,p:e.target.value}))} onKeyDown={e=>e.key==="Enter"&&runSearch()} /></div>
+              <div className="pf"><div className="pf-label"><span className="pf-dot pd-i">I</span>Intervention</div><input className="pf-inp" placeholder="e.g. hormone replacement therapy" value={pico.i} onChange={e=>setPico(v=>({...v,i:e.target.value}))} onKeyDown={e=>e.key==="Enter"&&runSearch()} /></div>
+              <div className="pf"><div className="pf-label"><span className="pf-dot pd-c">C</span>Comparison <span style={{fontWeight:400,fontSize:10,color:"var(--t3)"}}>optional</span></div><input className="pf-inp" placeholder="e.g. placebo" value={pico.c} onChange={e=>setPico(v=>({...v,c:e.target.value}))} onKeyDown={e=>e.key==="Enter"&&runSearch()} /></div>
+              <div className="pf"><div className="pf-label"><span className="pf-dot pd-o">O</span>Outcome</div><input className="pf-inp" placeholder="e.g. cardiovascular events" value={pico.o} onChange={e=>setPico(v=>({...v,o:e.target.value}))} onKeyDown={e=>e.key==="Enter"&&runSearch()} /></div>
+              {picoQ(pico.p,pico.i,pico.c,pico.o) && <div className="pico-preview" style={{gridColumn:"1/-1"}}>{picoQ(pico.p,pico.i,pico.c,pico.o)}</div>}
+            </div>
+          )}
+
+          {eqUsed && eqUsed!==kw && <div className="eq-banner"><b>Smart query:</b> {eqUsed}</div>}
+        </div>
+      </div>
+
+      {/* Main */}
       <main className="main">
 
-        {/* Empty state */}
-        {!hasSearched&&(
+        {!searched && (
           <div className="empty">
             <div className="empty-ico">📚</div>
-            <div className="empty-title">Search the clinical literature</div>
-            <div className="empty-desc">Enter a topic, clinical question, or switch to PICO mode for structured searching. Results stream in simultaneously from 6 databases. Enable Smart Search for AI-optimised boolean queries.</div>
+            <div className="empty-title">Find the evidence</div>
+            <div className="empty-desc">Search 6 free databases simultaneously. Click ⚙ to set your API key and institutional proxy — then every result, including paywalled papers, opens directly.</div>
             <div className="db-chips">{["PubMed","Europe PMC","Semantic Scholar","OpenAlex","CrossRef","DOAJ"].map(d=><span key={d} className="db-chip">{d}</span>)}</div>
-            <div className="eq-chips">{EXAMPLES.map(q=><button key={q} className="eq-chip" onClick={()=>{setKw(q);setSearchMode("free");setTimeout(()=>runSearch(q),0);}}>{q}</button>)}</div>
+            <div className="ex-chips" style={{marginTop:12}}>{EXAMPLES.map(q=><button key={q} className="ex-chip" onClick={()=>{setKw(q);setMode("free");setTimeout(()=>runSearch(q),0);}}>{q}</button>)}</div>
           </div>
         )}
 
-        {hasSearched&&(
-          <>
-            {/* Source tabs */}
-            <div className="src-row">
-              <span className="src-lbl">Source:</span>
-              {SRCS_LIST.map(s=>(
-                <button key={s.key} className={`spill ${activeSource===s.key?"active":""}`} onClick={()=>setActiveSource(s.key)}>
-                  {s.label}<span className="pn">{loading[s.key]?"…":s.count}</span>
-                </button>
-              ))}
-            </div>
+        {searched && (<>
+          {/* Source tabs */}
+          <div className="tabs">
+            {TABS.map(t=><button key={t.key} className={`tab ${activeSrc===t.key?"active":""}`} onClick={()=>setActiveSrc(t.key)}>{t.label}<span className="tab-n">{loading[t.key]?"…":t.count}</span></button>)}
+          </div>
 
-            {/* Paywall database strip */}
-            <div className="pw-strip">
-              <div className="pw-strip-hd">
-                <span className="pw-strip-lbl">🗝 Paywall databases — search with same keywords</span>
-                <span className="pw-strip-note">{ezproxyUrl?"Links route through your institutional proxy — paywalled papers will open directly":"Set your EZproxy URL above to open these through institutional access"}</span>
-              </div>
-              <div className="pw-dbs">
-                {PAYWALL_DBS.map(db=>{
-                  const rawUrl = db.getUrl(effectiveQuery||kw);
-                  const href = ezproxyUrl ? proxyLink(rawUrl) : rawUrl;
-                  return (
-                    <a key={db.name} className="pw-db-btn" href={href} target="_blank" rel="noreferrer"
-                       style={{borderColor:db.color,color:db.color,background:db.bg}}>
-                      {db.name} ↗
-                    </a>
-                  );
-                })}
-              </div>
-            </div>
-
-            {Object.entries(errors).map(([k,m])=><div key={k} className="errbar">⚠ {SRC_META[k]?.label}: {m}</div>)}
-
-            {/* AI Panel */}
-            {(aiLoading||(aiSummary&&!aiDismissed))&&(
-              <div className="ai-panel">
-                <div className="ai-top">
-                  <div className="ai-badge"><div className="ai-dot"/>AI Evidence Synthesis</div>
-                  {aiSummary&&<EvBadge level={aiSummary.evidence_level}/>}
-                  {aiSummary&&<button className="ai-dismiss" onClick={()=>setAiDismissed(true)}>✕</button>}
-                </div>
-                {aiLoading&&!aiSummary&&<div className="ai-loading"><div className="mspin" style={{borderTopColor:"rgba(255,255,255,.6)",borderColor:"rgba(255,255,255,.15)"}}/>Analysing {allResults.length} papers…</div>}
-                {aiSummary&&(<>
-                  {aiSummary.overview&&<div className="ai-overview">{aiSummary.overview}</div>}
-                  {aiSummary.study_types?.length>0&&<div className="ai-section" style={{marginBottom:14}}><div className="ai-slbl">Study types identified</div><div className="ai-types">{aiSummary.study_types.map((t,i)=><span key={i} className="ai-chip">{t}</span>)}</div></div>}
-                  {aiSummary.themes?.length>0&&<div style={{marginBottom:14}}><div className="ai-slbl">Key themes</div><div className="ai-tags">{aiSummary.themes.map((t,i)=><span key={i} className="ai-tag">📌 {t}</span>)}</div></div>}
-                  {aiSummary.clinical_implications&&<div className="ai-clinical"><div className="ai-clbl">Clinical implications</div><div className="ai-ctxt">{aiSummary.clinical_implications}</div></div>}
-                  {aiSummary.gaps&&<div className="ai-gaps-wrap"><div className="ai-glbl">Research gaps</div><div className="ai-gtxt">{aiSummary.gaps}</div></div>}
-                  {aiSummary.suggested_terms?.length>0&&<div style={{marginTop:12}}><div className="ai-suglbl">Try these related searches</div><div className="ai-sugwrap">{aiSummary.suggested_terms.map((t,i)=><button key={i} className="ai-sug" onClick={()=>runSearch(t)}>{t}</button>)}</div></div>}
-                </>)}
-              </div>
-            )}
-
-            {!apiKey&&!aiLoading&&!aiSummary&&hasSearched&&allResults.length>0&&(
-              <div className="ai-panel">
-                <div className="ai-top"><div className="ai-badge">✦ AI Synthesis</div></div>
-                <div className="ai-nokey">Add your <strong>Anthropic API key</strong> in ⚙ Settings to enable evidence synthesis, smart query optimisation, and research gap analysis.</div>
-              </div>
-            )}
-
-            {isLoading&&sorted.length===0&&(
-              <div className="ldsrcs">{SRCS_LIST.slice(1).map(s=>(
-                <div key={s.key} className="ldsrc">
-                  {loading[s.key]?<div className="mspin"/>:<div className="ddot">✓</div>}
-                  {s.label}
-                  {!loading[s.key]&&<span style={{marginLeft:"auto",fontSize:12,color:"var(--tx4)"}}>{s.count} results</span>}
-                </div>
-              ))}</div>
-            )}
-
-            {bookmarks.size>0&&(
-              <div className="bkbar">
-                <span className="bkct">🔖 {bookmarks.size} bookmarked</span>
-                <button className="bkview" onClick={()=>setShowBookmarks(v=>!v)}>{showBookmarks?"Show all results":"View bookmarks only"}</button>
-                <button className="bkclr" onClick={()=>{setBookmarks(new Set());setShowBookmarks(false);}}>Clear all</button>
-              </div>
-            )}
-
-            {sorted.length>0&&(
-              <div className="toolbar">
-                <span className="res-count">{sorted.length} paper{sorted.length!==1?"s":""} · {activeSource!=="all"?SRC_META[activeSource]?.label:"all sources, deduplicated"}{(oaOnly||yearFrom||yearTo)?" · filtered":""}</span>
-                <div className="tbr">
-                  <select className="sortsel" value={sortBy} onChange={e=>setSortBy(e.target.value)}>
-                    <option value="smart">Sort: Smart Relevance</option>
-                    <option value="year">Sort: Year (newest)</option>
-                    <option value="relevance">Sort: API Order</option>
-                  </select>
-                  <div className="expwrap" ref={expRef}>
-                    <button className="expbtn" onClick={()=>setShowExport(v=>!v)}>⎘ Export ▾</button>
-                    {showExport&&(
-                      <div className="expmenu">
-                        <button className="expitem" onClick={()=>handleExport("text")}>📋 Copy plain text</button>
-                        <button className="expitem" onClick={()=>handleExport("bib")}>📄 Download BibTeX</button>
-                        <button className="expitem" onClick={()=>handleExport("ris")}>📄 Download RIS</button>
-                        <button className="expitem" onClick={()=>handleExport("csv")}>📊 Download CSV</button>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            <div>
-              {sorted.map((r,i)=>{
-                const oa=oaStatus[r.id];
-                const freePdf=r.pdfUrl||oa?.pdfUrl;
-                const hasFree=r.isOA||r.pdfUrl||oa?.isOA;
-                const isExp=expandedAbs.has(r.id);
-                const needsExp=r.abstract&&r.abstract.length>280;
-                const dispAbs=isExp||!needsExp?r.abstract:truncDisp(r.abstract);
-                const viewLink = ezproxyUrl&&(r.doi||r.link) ? proxyLink(r.doi||r.link) : (r.doi||r.link);
-                return (
-                  <div className="rcard" key={r.id} style={{animationDelay:`${Math.min(i,12)*.025}s`}}>
-                    <div className="card-top">
-                      <div className="ctitle">{viewLink?<a href={viewLink} target="_blank" rel="noreferrer">{r.title}</a>:r.title}</div>
-                      <div className="cbadges">
-                        <span className={`srcbadge ${SRC_META[r.source]?.badge}`}>{SRC_META[r.source]?.label}</span>
-                        {r.studyType&&<StudyBadge type={r.studyType}/>}
-                      </div>
-                    </div>
-                    <div className="cmeta">
-                      {r.year&&<span className="myr">{r.year}</span>}
-                      {r.journal&&<><span className="msep">·</span><span className="mjnl">{r.journal}</span></>}
-                      {r.authors&&<><span className="msep">·</span><span className="mauth">{r.authors}</span></>}
-                      {r.citationCount!=null&&r.citationCount>0&&<><span className="msep">·</span><span className="mcite">📎 {r.citationCount}</span></>}
-                    </div>
-                    <div className="cabstract">{dispAbs||<span style={{color:"var(--tx4)",fontStyle:"italic"}}>No abstract available. Click View Paper for full text.</span>}</div>
-                    {needsExp&&<button className="abs-more" onClick={()=>setExpandedAbs(s=>{const n=new Set(s);n.has(r.id)?n.delete(r.id):n.add(r.id);return n;})}>{isExp?"Show less ▲":"Show full abstract ▼"}</button>}
-                    <div className="cfooter">
-                      {viewLink&&<a className="lbtn lb-pri" href={viewLink} target="_blank" rel="noreferrer">↗ View Paper{ezproxyUrl?" (via proxy)":""}</a>}
-                      {freePdf&&<a className="lbtn lb-grn" href={freePdf} target="_blank" rel="noreferrer">↓ Free PDF</a>}
-                      {!freePdf&&r.doi&&!oa&&<button className="lbtn lb-amb" onClick={()=>handleCheckOA(r.doi,r.id)} disabled={oa?.checking}>{oa?.checking?"Checking…":"🔓 Find Free Version"}</button>}
-                      {oa&&!oa.isOA&&!oa.checking&&<span className="lbtn lb-gray">No free version</span>}
-                      {hasFree&&<span className="oa-flag">Open Access</span>}
-                      {ezproxyUrl&&!hasFree&&<span className="proxy-flag">Proxy</span>}
-                      <button className={`bkbtn ${bookmarks.has(r.id)?"saved":""}`} onClick={()=>setBookmarks(s=>{const n=new Set(s);n.has(r.id)?n.delete(r.id):n.add(r.id);return n;})} title={bookmarks.has(r.id)?"Remove bookmark":"Bookmark"} style={{marginLeft:"auto"}}>{bookmarks.has(r.id)?"🔖":"🏷"}</button>
-                    </div>
-                  </div>
-                );
+          {/* Paywall strip */}
+          <div className="pw-strip">
+            <div className="pw-strip-hd">Paywall databases — same query, one click{proxy?" · routed via institutional proxy":""}</div>
+            <div className="pw-dbs">
+              {PAYWALL_DBS.map(db=>{
+                const url=db.getUrl(eq||kw);
+                return <a key={db.name} className="pw-btn" href={proxy?proxify(url):url} target="_blank" rel="noreferrer" style={{borderColor:db.color,color:db.color,background:db.bg}}>{db.name} ↗</a>;
               })}
             </div>
+            {!proxy && <div className="pw-note">Add your EZproxy URL in ⚙ Settings to open these through institutional access</div>}
+          </div>
 
-            {hasSearched&&!isLoading&&sorted.length===0&&allResults.length>0&&(
-              <div style={{textAlign:"center",padding:"32px",color:"var(--tx3)",fontSize:14}}>
-                No results match the current filters. <button style={{color:"var(--navy-600)",background:"none",border:"none",cursor:"pointer",fontFamily:"inherit",fontSize:14,fontWeight:600}} onClick={()=>{setYearFrom("");setYearTo("");setOaOnly(false);setShowBookmarks(false);}}>Clear filters</button>
+          {/* Errors */}
+          {Object.entries(errors).map(([k,m])=><div key={k} className="err-row">⚠ {SRC_META[k]?.label}: {m}</div>)}
+
+          {/* AI panel */}
+          {(aiLoad||(aiSum&&!aiOff)) && (
+            <div className="ai-panel">
+              <div className="ai-hd">
+                <div className="ai-badge"><div className="ai-dot"/>AI Synthesis</div>
+                {aiSum && <EvBadge level={aiSum.evidence_level}/>}
+                {aiSum && <button className="ai-dismiss" onClick={()=>setAiOff(true)}>✕</button>}
               </div>
-            )}
-          </>
-        )}
+              {aiLoad&&!aiSum && <div className="ai-loading"><div className="mspin"/>Analysing {allR.length} papers…</div>}
+              {aiSum && (<>
+                {aiSum.overview && <div className="ai-overview">{aiSum.overview}</div>}
+                {aiSum.study_types?.length>0 && <div style={{marginBottom:12}}><div className="ai-slbl">Study types</div><div className="ai-types">{aiSum.study_types.map((t,i)=><span key={i} className="ai-chip">{t}</span>)}</div></div>}
+                {aiSum.themes?.length>0 && <div style={{marginBottom:12}}><div className="ai-slbl">Key themes</div><div className="ai-tags">{aiSum.themes.map((t,i)=><span key={i} className="ai-tag">📌 {t}</span>)}</div></div>}
+                {aiSum.clinical_implications && <div className="ai-box ai-box-green"><div className="ai-box-lbl">Clinical implications</div><div className="ai-box-txt">{aiSum.clinical_implications}</div></div>}
+                {aiSum.gaps && <div className="ai-box ai-box-teal"><div className="ai-box-lbl">Research gaps</div><div className="ai-box-txt">{aiSum.gaps}</div></div>}
+                {aiSum.suggested_terms?.length>0 && <div><div className="ai-slbl">Try next</div><div className="ai-sug-wrap">{aiSum.suggested_terms.map((t,i)=><button key={i} className="ai-sug" onClick={()=>runSearch(t)}>{t}</button>)}</div></div>}
+              </>)}
+            </div>
+          )}
 
-        {/* Legal access section */}
+          {!apiKey&&!aiLoad&&!aiSum&&allR.length>0 && (
+            <div className="ai-panel">
+              <div className="ai-hd"><div className="ai-badge">✦ AI Synthesis</div></div>
+              <div className="ai-nokey">Add your Anthropic API key in <button style={{background:"none",border:"none",cursor:"pointer",color:"var(--teal)",fontWeight:700,fontFamily:"var(--ff)",fontSize:13}} onClick={()=>setShowModal(true)}>⚙ Settings</button> to get an evidence overview, themes, and research gaps.</div>
+            </div>
+          )}
+
+          {/* Loading */}
+          {isLoading&&sorted.length===0 && <div className="ld-list">{TABS.slice(1).map(t=><div key={t.key} className="ld-row">{loading[t.key]?<div className="mspin"/>:<div className="ld-done">✓</div>}{t.label}{!loading[t.key]&&<span style={{marginLeft:"auto",fontSize:12,color:"var(--t3)"}}>{t.count}</span>}</div>)}</div>}
+
+          {/* Filters */}
+          <div className="filters-row">
+            <button className={`filt-btn ${showFilt?"on":""}`} onClick={()=>setShowFilt(v=>!v)}>Filters{filtCount>0?` (${filtCount})`:""}</button>
+            {bookmarks.size>0 && <button className={`filt-btn ${showBk?"on":""}`} onClick={()=>setShowBk(v=>!v)}>🔖 Bookmarks ({bookmarks.size})</button>}
+            {(yrFrom||yrTo||oaOnly) && <button className="filt-btn" onClick={()=>{setYrFrom("");setYrTo("");setOaOnly(false);}}>Clear filters</button>}
+          </div>
+
+          {showFilt && (
+            <div className="filt-panel">
+              <div className="fg"><div className="fg-lbl">Year</div><div className="yr-row"><input className="yr-inp" type="number" placeholder="From" value={yrFrom} onChange={e=>setYrFrom(e.target.value)}/><span style={{color:"var(--t3)"}}>—</span><input className="yr-inp" type="number" placeholder="To" value={yrTo} onChange={e=>setYrTo(e.target.value)}/></div></div>
+              <div className="fg"><div className="fg-lbl">Access</div><label className="chk"><input type="checkbox" checked={oaOnly} onChange={e=>setOaOnly(e.target.checked)}/> Open access only</label></div>
+              <div className="fg"><div className="fg-lbl">Unpaywall</div><label className="chk"><input type="checkbox" checked={autoBatch} onChange={e=>setAutoBatch(e.target.checked)}/> Auto-check all results</label></div>
+            </div>
+          )}
+
+          {/* Toolbar */}
+          {sorted.length>0 && (
+            <div className="toolbar">
+              <span className="res-count">{sorted.length} results · {activeSrc!=="all"?SRC_META[activeSrc]?.label:"all sources"}{(oaOnly||yrFrom||yrTo)?" · filtered":""}</span>
+              <div className="tbr">
+                <select className="sortsel" value={sortBy} onChange={e=>setSortBy(e.target.value)}>
+                  <option value="smart">Smart relevance</option>
+                  <option value="year">Newest first</option>
+                  <option value="relevance">API order</option>
+                </select>
+                <div className="expwrap" ref={expRef}>
+                  <button className="expbtn" onClick={()=>setShowExp(v=>!v)}>Export ▾</button>
+                  {showExp && <div className="expmenu">
+                    <button className="expitem" onClick={()=>doExport("text")}>Copy plain text</button>
+                    <button className="expitem" onClick={()=>doExport("bib")}>Download BibTeX</button>
+                    <button className="expitem" onClick={()=>doExport("ris")}>Download RIS</button>
+                    <button className="expitem" onClick={()=>doExport("csv")}>Download CSV</button>
+                  </div>}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Results */}
+          {sorted.map((r,i)=>{
+            const oa=oaStatus[r.id],freePdf=r.pdfUrl||oa?.pdfUrl,hasFree=r.isOA||r.pdfUrl||oa?.isOA;
+            const isExp=expanded.has(r.id),needs=r.abstract&&r.abstract.length>280;
+            const dispAbs=isExp||!needs?r.abstract:truncD(r.abstract);
+            const viewLink=proxy&&(r.doi||r.link)?proxify(r.doi||r.link):(r.doi||r.link);
+            return (
+              <div className="rcard" key={r.id} style={{animationDelay:`${Math.min(i,10)*.03}s`}}>
+                <div className="card-top">
+                  <div className="ctitle">{viewLink?<a href={viewLink} target="_blank" rel="noreferrer">{r.title}</a>:r.title}</div>
+                  <div className="cbadges">
+                    <span className={`srcbadge ${SRC_META[r.source]?.badge}`}>{SRC_META[r.source]?.label}</span>
+                    <SBadge type={r.studyType}/>
+                  </div>
+                </div>
+                <div className="cmeta">
+                  {r.year&&<span className="myr">{r.year}</span>}
+                  {r.journal&&<><span className="msep">·</span><span className="mjnl">{r.journal}</span></>}
+                  {r.authors&&<><span className="msep">·</span><span style={{color:"var(--t3)"}}>{r.authors}</span></>}
+                  {r.citationCount>0&&<><span className="msep">·</span><span className="mcite">📎 {r.citationCount}</span></>}
+                </div>
+                {dispAbs && <div className="cabstract">{dispAbs}</div>}
+                {!dispAbs && <div className="cabstract" style={{color:"var(--t3)",fontStyle:"italic"}}>No abstract available.</div>}
+                {needs && <button className="abs-more" onClick={()=>setExpanded(s=>{const n=new Set(s);n.has(r.id)?n.delete(r.id):n.add(r.id);return n;})}>{isExp?"Show less":"Show full abstract"}</button>}
+                <div className="cfooter">
+                  {viewLink&&<a className="lbtn lb-pri" href={viewLink} target="_blank" rel="noreferrer">View paper ↗</a>}
+                  {freePdf&&<a className="lbtn lb-grn" href={freePdf} target="_blank" rel="noreferrer">Free PDF ↓</a>}
+                  {!freePdf&&r.doi&&!oa&&<button className="lbtn lb-amb" onClick={()=>checkOA(r.doi,r.id)} disabled={oa?.checking}>{oa?.checking?"Checking…":"Find free version"}</button>}
+                  {oa&&!oa.isOA&&!oa.checking&&<span className="lbtn lb-gray">No free version</span>}
+                  {hasFree&&<span className="oa-flag">Open Access</span>}
+                  {proxy&&!hasFree&&<span className="proxy-flag">Via proxy</span>}
+                  <button className={`bkbtn ${bookmarks.has(r.id)?"saved":""}`} onClick={()=>setBookmarks(s=>{const n=new Set(s);n.has(r.id)?n.delete(r.id):n.add(r.id);return n;})} title="Bookmark">{bookmarks.has(r.id)?"🔖":"🏷"}</button>
+                </div>
+              </div>
+            );
+          })}
+
+          {searched&&!isLoading&&sorted.length===0&&allR.length>0&&(
+            <div style={{textAlign:"center",padding:"32px",color:"var(--t3)",fontSize:14}}>
+              No results match these filters. <button style={{color:"var(--teal)",background:"none",border:"none",cursor:"pointer",fontFamily:"var(--ff)",fontWeight:600}} onClick={()=>{setYrFrom("");setYrTo("");setOaOnly(false);setShowBk(false);}}>Clear</button>
+            </div>
+          )}
+        </>)}
+
+        {/* Legal access */}
         <div className="section">
-          <div className="sechd"><div className="secico sic-tl">🔓</div><div className="sectitle">Legal Ways to Access Paywalled Papers</div></div>
-          <div className="secdesc">When institutional proxy access doesn't reach a specific paper, these legal routes usually will.</div>
-          <div className="wkgrid">
+          <div className="sec-title">Legal routes to paywalled papers</div>
+          <div className="sec-desc">When the institutional proxy doesn't cover a specific paper, these usually will.</div>
+          <div className="wk-grid">
             {WORKAROUNDS.map(w=>(
-              <div className="wkcard" key={w.name}>
-                <div className="wktop"><span className="wkico">{w.icon}</span><span className="wkname">{w.name}</span><span className={`wktype ${w.type==="free"?"t-free":w.type==="legal"?"t-legal":"t-tip"}`}>{w.type==="free"?"Free":w.type==="legal"?"Legal OA":"Tip"}</span></div>
-                <div className="wkdesc">{w.desc}</div>
-                <a className="wklink" href={w.url} target="_blank" rel="noreferrer">{w.ul} ↗</a>
+              <div className="wk-card" key={w.name}>
+                <div className="wk-top"><span className="wk-ico">{w.icon}</span><span className="wk-name">{w.name}</span><span className={`wk-type t-${w.type}`}>{w.type==="free"?"Free":w.type==="legal"?"Legal OA":"Tip"}</span></div>
+                <div className="wk-desc">{w.desc}</div>
+                <a className="wk-link" href={w.url} target="_blank" rel="noreferrer">{w.ul} ↗</a>
               </div>
             ))}
           </div>
         </div>
-
       </main>
 
-      <div className="footer">
-        MedLit Search · PubMed · Europe PMC · Semantic Scholar · OpenAlex · CrossRef · DOAJ ·
-        Open access via <a href="https://unpaywall.org" target="_blank" rel="noreferrer">Unpaywall</a> ·
-        Built for clinical researchers
-      </div>
-
-      {toast&&<div className="toast">{toast}</div>}
+      <div className="footer">MedLit Search · PubMed · Europe PMC · Semantic Scholar · OpenAlex · CrossRef · DOAJ</div>
+      {toast && <div className="toast">{toast}</div>}
     </div>
   );
 }
