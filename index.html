@@ -314,6 +314,13 @@ const clean = (s="") => s.replace(/<[^>]*>/g,"").replace(/&amp;/g,"&").replace(/
 const trunc = (s, n=1500) => s ? (s.trim().length>n ? s.trim().slice(0,n)+"…" : s.trim()) : null;
 const truncD = (s, n=280) => s && s.length>n ? s.slice(0,n)+"…" : s;
 
+async function fetchT(url, opts={}, ms=9000) {
+  const ctrl = new AbortController();
+  const tid = setTimeout(() => ctrl.abort(), ms);
+  try { return await fetch(url, {...opts, signal: ctrl.signal}); }
+  finally { clearTimeout(tid); }
+}
+
 function rebuildAbstract(inv) {
   if(!inv||typeof inv!=="object") return null;
   try {
@@ -376,9 +383,9 @@ const toCSV = rs => { const e=s=>`"${(s||"").replace(/"/g,'""')}`; return ["Titl
 
 // ── APIs ───────────────────────────────────────────────────────────────────────
 async function searchPubMed(q) {
-  const sd=await(await fetch(`https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&term=${encodeURIComponent(q)}&retmax=15&retmode=json&sort=relevance`)).json();
+  const sd=await(await fetchT(`https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&term=${encodeURIComponent(q)}&retmax=15&retmode=json&sort=relevance`)).json();
   const ids=sd.esearchresult?.idlist||[]; if(!ids.length) return [];
-  const xml=await(await fetch(`https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&id=${ids.join(",")}&rettype=xml&retmode=xml`)).text();
+  const xml=await(await fetchT(`https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&id=${ids.join(",")}&rettype=xml&retmode=xml`)).text();
   const doc=new DOMParser().parseFromString(xml,"text/xml");
   return Array.from(doc.querySelectorAll("PubmedArticle")).map(a=>{
     const pmid=a.querySelector("PMID")?.textContent;
@@ -392,27 +399,30 @@ async function searchPubMed(q) {
 }
 
 async function searchEuropePMC(q) {
-  const d=await(await fetch(`https://www.ebi.ac.uk/europepmc/webservices/rest/search?query=${encodeURIComponent(q)}&format=json&pageSize=15&resultType=core&sort=relevance`)).json();
+  const d=await(await fetchT(`https://www.ebi.ac.uk/europepmc/webservices/rest/search?query=${encodeURIComponent(q)}&format=json&pageSize=15&resultType=core&sort=relevance`)).json();
   return (d.resultList?.result||[]).map(p=>{const abstract=trunc(p.abstractText||null);return{id:`epmc-${p.id}`,source:"europepmc",title:clean(p.title||"Untitled"),abstract,studyType:studyType(p.title||"",abstract||""),authors:(p.authorString?.length>90?p.authorString.slice(0,90)+"…":p.authorString)||"Unknown",year:String(p.pubYear||"n.d."),journal:p.journalTitle||"",doi:p.doi?`https://doi.org/${p.doi}`:null,link:p.doi?`https://doi.org/${p.doi}`:`https://europepmc.org/article/${p.source}/${p.id}`,pdfUrl:p.fullTextUrlList?.fullTextUrl?.find(u=>u.documentStyle==="pdf")?.url||null,isOA:!!p.isOpenAccess,oaChecked:true,citationCount:p.citedByCount||null};});
 }
 
 async function searchSemanticScholar(q) {
-  const d=await(await fetch(`https://api.semanticscholar.org/graph/v1/paper/search?query=${encodeURIComponent(q)}&limit=15&fields=title,authors,year,venue,externalIds,openAccessPdf,abstract,citationCount`)).json();
-  return (d.data||[]).map(p=>{const abstract=trunc(p.abstract||null);return{id:`ss-${p.paperId}`,source:"semanticscholar",title:clean(p.title||"Untitled"),abstract,studyType:studyType(p.title||"",abstract||""),authors:(p.authors?.slice(0,4).map(a=>a.name).join(", ")||"Unknown")+(p.authors?.length>4?" et al.":""),year:p.year?String(p.year):"n.d.",journal:p.venue||"",doi:p.externalIds?.DOI?`https://doi.org/${p.externalIds.DOI}`:null,link:`https://www.semanticscholar.org/paper/${p.paperId}`,pdfUrl:p.openAccessPdf?.url||null,isOA:!!p.openAccessPdf?.url,oaChecked:true,citationCount:p.citationCount??null};});
+  try {
+    const d=await(await fetchT(`https://api.semanticscholar.org/graph/v1/paper/search?query=${encodeURIComponent(q)}&limit=15&fields=title,authors,year,venue,externalIds,openAccessPdf,abstract,citationCount`)).json();
+    if(d.error||!d.data) return [];
+    return d.data.map(p=>{const abstract=trunc(p.abstract||null);return{id:`ss-${p.paperId}`,source:"semanticscholar",title:clean(p.title||"Untitled"),abstract,studyType:studyType(p.title||"",abstract||""),authors:(p.authors?.slice(0,4).map(a=>a.name).join(", ")||"Unknown")+(p.authors?.length>4?" et al.":""),year:p.year?String(p.year):"n.d.",journal:p.venue||"",doi:p.externalIds?.DOI?`https://doi.org/${p.externalIds.DOI}`:null,link:`https://www.semanticscholar.org/paper/${p.paperId}`,pdfUrl:p.openAccessPdf?.url||null,isOA:!!p.openAccessPdf?.url,oaChecked:true,citationCount:p.citationCount??null};});
+  } catch { return []; }
 }
 
 async function searchOpenAlex(q) {
-  const d=await(await fetch(`https://api.openalex.org/works?search=${encodeURIComponent(q)}&per-page=15&sort=relevance_score&mailto=medlitsearch@user.tool`)).json();
+  const d=await(await fetchT(`https://api.openalex.org/works?search=${encodeURIComponent(q)}&per-page=15&sort=relevance_score&mailto=medlitsearch@user.tool`)).json();
   return (d.results||[]).map(p=>{const abstract=trunc(rebuildAbstract(p.abstract_inverted_index));return{id:`oa-${p.id}`,source:"openalex",title:clean(p.title||"Untitled"),abstract,studyType:studyType(p.title||"",abstract||""),authors:(p.authorships?.slice(0,4).map(a=>a.author?.display_name).filter(Boolean).join(", ")||"Unknown")+(p.authorships?.length>4?" et al.":""),year:p.publication_year?String(p.publication_year):"n.d.",journal:p.primary_location?.source?.display_name||"",doi:p.doi||null,link:p.doi||p.id,pdfUrl:p.open_access?.oa_url||null,isOA:!!p.open_access?.is_oa,oaChecked:true,citationCount:p.cited_by_count??null};});
 }
 
 async function searchCrossRef(q) {
-  const d=await(await fetch(`https://api.crossref.org/works?query.bibliographic=${encodeURIComponent(q)}&rows=12&select=DOI,title,author,published,container-title,abstract&mailto=medlitsearch@user.tool`)).json();
+  const d=await(await fetchT(`https://api.crossref.org/works?query.bibliographic=${encodeURIComponent(q)}&rows=12&select=DOI,title,author,published,container-title,abstract&mailto=medlitsearch@user.tool`)).json();
   return (d.message?.items||[]).map(p=>{const doi=p.DOI,yr=p.published?.["date-parts"]?.[0]?.[0];const title=clean(Array.isArray(p.title)?p.title[0]:(p.title||"Untitled"));const abstract=trunc(p.abstract?clean(p.abstract):null);return{id:`cr-${doi}`,source:"crossref",title,abstract,studyType:studyType(title,abstract||""),authors:(p.author?.slice(0,4).map(a=>`${a.family||""} ${(a.given||"").slice(0,1)}`.trim()).join(", ")||"Unknown")+(p.author?.length>4?" et al.":""),year:yr?String(yr):"n.d.",journal:Array.isArray(p["container-title"])?p["container-title"][0]:(p["container-title"]||""),doi:`https://doi.org/${doi}`,link:`https://doi.org/${doi}`,pdfUrl:null,isOA:false,oaChecked:false,citationCount:null};});
 }
 
 async function searchDOAJ(q) {
-  const d=await(await fetch(`https://doaj.org/api/search/articles/${encodeURIComponent(q)}?page=1&pageSize=12`)).json();
+  const d=await(await fetchT(`https://doaj.org/api/search/articles/${encodeURIComponent(q)}?page=1&pageSize=12`)).json();
   return (d.results||[]).map(r=>{const bib=r.bibjson||{},doiId=bib.identifier?.find(i=>i.type==="doi")?.id,ft=bib.link?.find(l=>l.type==="fulltext")?.url;const title=clean(bib.title||"Untitled");const abstract=trunc(bib.abstract||null);return{id:`doaj-${r.id}`,source:"doaj",title,abstract,studyType:studyType(title,abstract||""),authors:(bib.author?.slice(0,4).map(a=>a.name).filter(Boolean).join(", ")||"Unknown")+(bib.author?.length>4?" et al.":""),year:String(bib.year||"n.d."),journal:bib.journal?.title||"",doi:doiId?`https://doi.org/${doiId}`:null,link:ft||(doiId?`https://doi.org/${doiId}`:`https://doaj.org/article/${r.id}`),pdfUrl:ft||null,isOA:true,oaChecked:true,citationCount:null};});
 }
 
