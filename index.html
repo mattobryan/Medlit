@@ -289,6 +289,26 @@
     /* Toast */
     .toast { position: fixed; bottom: 20px; right: 20px; background: var(--t1); color: #fff; border-radius: var(--r); padding: 11px 16px; font-size: 13px; font-weight: 500; z-index: 999; box-shadow: var(--sh3); animation: fadeUp .15s ease; }
 
+    /* Tooltips */
+    .tip-wrap { position: relative; display: inline-flex; align-items: center; }
+    .tip-icon { width: 16px; height: 16px; border-radius: 50%; background: var(--bd); color: var(--t2); font-size: 10px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; cursor: default; flex-shrink: 0; transition: background .15s; user-select: none; }
+    .tip-wrap:hover .tip-icon { background: var(--teal); color: #fff; }
+    .tip-box { position: absolute; bottom: calc(100% + 7px); left: 50%; transform: translateX(-50%); background: var(--t1); color: #fff; padding: 8px 11px; border-radius: var(--rs); font-size: 12px; line-height: 1.55; z-index: 300; pointer-events: none; width: 220px; white-space: normal; box-shadow: var(--sh2); opacity: 0; transition: opacity .15s; }
+    .tip-wrap:hover .tip-box { opacity: 1; }
+    .tip-box::after { content:""; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); border: 5px solid transparent; border-top-color: var(--t1); }
+
+    /* DB info panel */
+    .db-panel { background: #fff; border: 1px solid var(--bd); border-radius: var(--r); padding: 18px 20px; margin-bottom: 14px; animation: fadeUp .2s ease both; }
+    .db-panel-hd { font-size: 13px; font-weight: 700; color: var(--t1); margin-bottom: 12px; }
+    .db-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    .db-table th { text-align: left; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--t3); padding: 0 10px 6px 0; border-bottom: 1px solid var(--bd); }
+    .db-table td { padding: 7px 10px 7px 0; border-bottom: 1px solid var(--bd2); color: var(--t2); vertical-align: top; }
+    .db-table tr:last-child td { border-bottom: none; }
+    .db-table td:first-child { font-weight: 600; color: var(--t1); white-space: nowrap; }
+    .db-badge { display: inline-block; font-size: 10px; font-weight: 700; padding: 1px 7px; border-radius: 20px; text-transform: uppercase; }
+    .db-free { background: var(--green-l); color: var(--green); }
+    .db-inst { background: var(--blue-l); color: var(--blue); }
+
     /* Footer */
     .footer { text-align: center; padding: 32px 24px 16px; font-size: 11px; color: var(--t3); }
 
@@ -472,6 +492,40 @@ const WORKAROUNDS=[
 
 const EXAMPLES=["postnatal depression maternal mental health","nurse-led sepsis recognition","hand hygiene ICU infection prevention","breastfeeding support interventions","pressure injury prevention elderly","opioid management palliative care"];
 
+const ALL_DBS=[
+  {name:"PubMed",        type:"free", coverage:"35M+ biomedical records. US National Library of Medicine. Gold standard for clinical and biomedical literature."},
+  {name:"Europe PMC",    type:"free", coverage:"MEDLINE + Cochrane + preprints. Full-text links where available. Includes grey literature."},
+  {name:"Semantic Scholar",type:"free",coverage:"AI-powered index. Surfaces open-access PDFs automatically. May rate-limit under heavy use."},
+  {name:"OpenAlex",      type:"free", coverage:"250M+ scholarly works. Fully open. Reconstructs abstracts from inverted index."},
+  {name:"CrossRef",      type:"free", coverage:"150M+ DOI registry. Broad cross-disciplinary metadata."},
+  {name:"DOAJ",          type:"free", coverage:"Directory of Open Access Journals. Peer-reviewed OA articles only. Every result is free full text."},
+  {name:"CINAHL",        type:"inst", coverage:"Nursing, midwifery, allied health — 1937 to present. Essential for clinical nursing research."},
+  {name:"Scopus",        type:"inst", coverage:"Multidisciplinary. 90M+ records from 7,000+ publishers. Strong citation tracking."},
+  {name:"Cochrane",      type:"inst", coverage:"Gold-standard systematic reviews and RCTs. Abstracts free globally; full reviews require institutional access."},
+  {name:"Web of Science",type:"inst", coverage:"High-impact journals, citation mapping. 1900 to present. Best for impact factor analysis."},
+  {name:"PsycINFO",      type:"inst", coverage:"Psychology, psychiatry, psychosocial interventions. Uses controlled Descriptor vocabulary."},
+  {name:"AMED",          type:"inst", coverage:"Allied and complementary medicine. Physiotherapy, OT, palliative care. Unique coverage not in PubMed."},
+  {name:"ProQuest",      type:"inst", coverage:"Dissertations, theses, grey literature. Best source for graduate research and policy documents."},
+  {name:"MIDIRS",        type:"inst", coverage:"Specialist maternity and infant care literature. Highly curated, narrow but precise."},
+];
+
+const PICO_HELP={
+  p:"Population / Patient — Who is being studied? Define the group of people, the condition, or the setting. Example: university students in Sub-Saharan Africa",
+  i:"Intervention — What is being done, studied, or exposed? Example: antibiotic use practices or AMR education programmes",
+  c:"Comparison — What is it being compared to? This is optional. Example: students with vs. without pharmacy training",
+  o:"Outcome — What is being measured or observed? Example: knowledge levels, attitude change, prescribing behaviour",
+};
+
+// ── Tooltip component ──────────────────────────────────────────────────────────
+function Tip({text}) {
+  return (
+    <span className="tip-wrap">
+      <span className="tip-icon">?</span>
+      <span className="tip-box">{text}</span>
+    </span>
+  );
+}
+
 // ── Components ─────────────────────────────────────────────────────────────────
 const SBadge=({type})=>{ const c=type&&ST_CSS[type]; return c?<span className={`stbadge ${c}`}>{type}</span>:null; };
 const EvBadge=({level})=>{ if(!level) return null; const c={HIGH:"ev-high",MODERATE:"ev-moderate",LOW:"ev-low",MIXED:"ev-mixed"}[level.toUpperCase()]||"ev-mixed"; return <span className={`ai-ev ${c}`}>{level}</span>; };
@@ -487,9 +541,9 @@ function App() {
   const [apiKey, setApiKey] = useState(()=>localStorage.getItem("ml-key")||"");
   const [showModal, setShowModal] = useState(false);
   const [mKey, setMKey] = useState(()=>localStorage.getItem("ml-key")||"");
-  const [mInst, setMInst] = useState(()=>localStorage.getItem("ml-inst")||"");
+  const [mInst, setMInst] = useState(()=>localStorage.getItem("ml-inst")||"Glasgow Caledonian University");
   const [mProxy, setMProxy] = useState(()=>localStorage.getItem("ml-proxy")||"");
-  const [inst, setInst] = useState(()=>localStorage.getItem("ml-inst")||"");
+  const [inst, setInst] = useState(()=>localStorage.getItem("ml-inst")||"Glasgow Caledonian University");
   const [proxy, setProxy] = useState(()=>localStorage.getItem("ml-proxy")||"");
 
   const [results, setResults] = useState({pubmed:[],europepmc:[],semanticscholar:[],openalex:[],crossref:[],doaj:[]});
@@ -512,6 +566,7 @@ function App() {
   const [oaOnly, setOaOnly] = useState(false);
   const [autoBatch, setAutoBatch] = useState(false);
   const [showFilt, setShowFilt] = useState(false);
+  const [showDbInfo, setShowDbInfo] = useState(false);
   const [history, setHistory] = useState(()=>{try{return JSON.parse(sessionStorage.getItem("ml-hist")||"[]");}catch{return[];}});
 
   const toastRef=useRef(null), expRef=useRef(null);
@@ -582,9 +637,10 @@ function App() {
           </div>
           <div className="hdr-gap"/>
           <div className="hdr-btns">
-            <button className={`hbtn ${smart?"on":""}`} onClick={()=>setSmart(v=>!v)} title="AI-optimises your query before searching">
+            <button className={`hbtn ${smart?"on":""}`} onClick={()=>setSmart(v=>!v)}>
               ✦ Smart{smart?" ON":" OFF"}
             </button>
+            <Tip text="Smart Search uses Claude to rewrite your topic into an optimised boolean query with synonyms and MeSH-style terms before searching. Requires an API key." />
             <button className="hbtn hbtn-icon" onClick={()=>setShowModal(true)} title="Settings">⚙</button>
           </div>
         </div>
@@ -643,10 +699,10 @@ function App() {
 
           {mode==="pico" && (
             <div className="pico-wrap">
-              <div className="pf"><div className="pf-label"><span className="pf-dot pd-p">P</span>Population</div><input className="pf-inp" placeholder="e.g. postmenopausal women" value={pico.p} onChange={e=>setPico(v=>({...v,p:e.target.value}))} onKeyDown={e=>e.key==="Enter"&&runSearch()} /></div>
-              <div className="pf"><div className="pf-label"><span className="pf-dot pd-i">I</span>Intervention</div><input className="pf-inp" placeholder="e.g. hormone replacement therapy" value={pico.i} onChange={e=>setPico(v=>({...v,i:e.target.value}))} onKeyDown={e=>e.key==="Enter"&&runSearch()} /></div>
-              <div className="pf"><div className="pf-label"><span className="pf-dot pd-c">C</span>Comparison <span style={{fontWeight:400,fontSize:10,color:"var(--t3)"}}>optional</span></div><input className="pf-inp" placeholder="e.g. placebo" value={pico.c} onChange={e=>setPico(v=>({...v,c:e.target.value}))} onKeyDown={e=>e.key==="Enter"&&runSearch()} /></div>
-              <div className="pf"><div className="pf-label"><span className="pf-dot pd-o">O</span>Outcome</div><input className="pf-inp" placeholder="e.g. cardiovascular events" value={pico.o} onChange={e=>setPico(v=>({...v,o:e.target.value}))} onKeyDown={e=>e.key==="Enter"&&runSearch()} /></div>
+              <div className="pf"><div className="pf-label"><span className="pf-dot pd-p">P</span>Population <Tip text={PICO_HELP.p}/></div><input className="pf-inp" placeholder="e.g. university students Sub-Saharan Africa" value={pico.p} onChange={e=>setPico(v=>({...v,p:e.target.value}))} onKeyDown={e=>e.key==="Enter"&&runSearch()} /></div>
+              <div className="pf"><div className="pf-label"><span className="pf-dot pd-i">I</span>Intervention <Tip text={PICO_HELP.i}/></div><input className="pf-inp" placeholder="e.g. antibiotic use AMR awareness" value={pico.i} onChange={e=>setPico(v=>({...v,i:e.target.value}))} onKeyDown={e=>e.key==="Enter"&&runSearch()} /></div>
+              <div className="pf"><div className="pf-label"><span className="pf-dot pd-c">C</span>Comparison <span style={{fontWeight:400,fontSize:10,color:"var(--t3)"}}>optional</span> <Tip text={PICO_HELP.c}/></div><input className="pf-inp" placeholder="e.g. pharmacy vs non-pharmacy students" value={pico.c} onChange={e=>setPico(v=>({...v,c:e.target.value}))} onKeyDown={e=>e.key==="Enter"&&runSearch()} /></div>
+              <div className="pf"><div className="pf-label"><span className="pf-dot pd-o">O</span>Outcome <Tip text={PICO_HELP.o}/></div><input className="pf-inp" placeholder="e.g. knowledge attitudes behaviours" value={pico.o} onChange={e=>setPico(v=>({...v,o:e.target.value}))} onKeyDown={e=>e.key==="Enter"&&runSearch()} /></div>
               {picoQ(pico.p,pico.i,pico.c,pico.o) && <div className="pico-preview" style={{gridColumn:"1/-1"}}>{picoQ(pico.p,pico.i,pico.c,pico.o)}</div>}
             </div>
           )}
@@ -670,9 +726,30 @@ function App() {
 
         {searched && (<>
           {/* Source tabs */}
-          <div className="tabs">
+          <div className="tabs" style={{alignItems:"center"}}>
             {TABS.map(t=><button key={t.key} className={`tab ${activeSrc===t.key?"active":""}`} onClick={()=>setActiveSrc(t.key)}>{t.label}<span className="tab-n">{loading[t.key]?"…":t.count}</span></button>)}
+            <button className={`tab ${showDbInfo?"active":""}`} style={{marginLeft:"auto",gap:4}} onClick={()=>setShowDbInfo(v=>!v)}>ⓘ All databases</button>
           </div>
+
+          {/* DB info panel */}
+          {showDbInfo && (
+            <div className="db-panel">
+              <div className="db-panel-hd">Databases searched by MedLit</div>
+              <table className="db-table">
+                <thead><tr><th>Database</th><th>Access</th><th>Coverage</th></tr></thead>
+                <tbody>
+                  {ALL_DBS.map(db=>(
+                    <tr key={db.name}>
+                      <td>{db.name}</td>
+                      <td><span className={`db-badge ${db.type==="free"?"db-free":"db-inst"}`}>{db.type==="free"?"Free":"Institutional"}</span></td>
+                      <td>{db.coverage}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <div style={{fontSize:11,color:"var(--t3)",marginTop:10}}>Free databases are searched automatically. Institutional databases open via your EZproxy URL — configure it in ⚙ Settings.</div>
+            </div>
+          )}
 
           {/* Paywall strip */}
           <div className="pw-strip">
